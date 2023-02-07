@@ -1,0 +1,3 @@
+# Odometry Research for Localization
+
+For the most accurate localization, the robot will need to fuse odometry data from the wheel encoders and the IMU data. This will provide locally accurate and smooth odometry updates. However, wheels can slip due to a lack of proper friction. Thus, we will need to use the ```robot_localization``` package to provide nonlinear state estimation through sensor fusion and an extended Kalman filter. 
