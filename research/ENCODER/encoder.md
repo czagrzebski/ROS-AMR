@@ -2,7 +2,7 @@
 
 
 ## Overview
- A DC motor encoder is a device that is used to measure the speed and position of a direct current motor. It typically consists of a sensor that is attached to the motor shaft, which generates pulses as the shaft rotates. These pulses are converted into a digital signal that can be read by a control systems, allowing the motor's speed and position to be monitored and controlled. 
+ A DC motor encoder is a device that is used to measure the speed and position of a direct current motor. It typically consists of a sensor that is attached to the motor shaft, which generates pulses as the shaft rotates. These pulses are converted into a digital signal that can be read by a control systems, allowing the motor's speed and position to be monitored and controlled. The data gathered by the encoder will be used in combination with an IMU for odometry the fundamental algorithm for computing robotic motion. 
 
  There are two main types of motor encoders
     
@@ -57,4 +57,4 @@ To calculate RPM, we use the following equation:
 
 $RPM = \frac{revolutions}{minute} = \frac{(\text{Pulses Per Second} * 60)}{\text{Pulses Per Revolution}}$
 
-Pulses per second is the number of pulses monitored within a one second period. We then convert it to pulses per minute by multiplying it by 60 since we are looking for revolutions per minute and not per second. We then divide this by the constant Pulses Per Revolution, which can be calculated by measuring the amount of pulses when manually rotating the encoder $360\degree$.
+Pulses per second is the number of pulses monitored within a one second period. We then convert it to pulses per minute by multiplying it by 60, since we are looking for revolutions per minute and not per second. We then divide this by the constant Pulses Per Revolution, which can be calculated by measuring the amount of pulses when manually rotating the encoder $360\degree$.
