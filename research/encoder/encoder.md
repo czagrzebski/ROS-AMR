@@ -51,3 +51,10 @@ An encoder typically has the following I/O:
 
 The Out A will be used for our state detection (via Interrupt) and Out B will be used for finding the direction. Output A/B will be connected as Digital Outputs to the Arduino. Note: The image shown is a dedicated rotary switch and is not connected to a DC motor. However, a DC motor with a built-in encoder will have the Out A/B built-in to the motor I/O.
 
+In order to determine the speed, we need to calculate the RPM of our motor. This will then allow us to use the circumference of our wheel to calculate the speed our robot will travel. 
+
+To calculate RPM, we use the following equation:
+
+$RPM = \frac{revolutions}{minute} = \frac{(\text{Pulses Per Second} * 60)}{\text{Pulses Per Revolution}}$
+
+Pulses per second is the number of pulses monitored within a one second period. We then convert it to pulses per minute by multiplying it by 60 since we are looking for revolutions per minute and not per second. We then divide this by the constant Pulses Per Revolution, which can be calculated by measuring the amount of pulses when manually rotating the encoder $360\degree$.
