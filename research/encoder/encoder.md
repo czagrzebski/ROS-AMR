@@ -6,14 +6,14 @@
 
  There are two main types of motor encoders
     
-1. **Absolute encoders:** Gives a unique digital code for each distinct position of the motor shaft ,allowing the exact position of the shaft to be determined at any time. Often used where precise position is required, especially in robot or machine tool applications
+1. **Absolute encoders:** Gives a unique digital code for each distinct position of the motor shaft, allowing the exact position of the shaft to be determined at any time. Often used where precise position is required, especially in robot or machine tool applications
 2. **Incremental Encoders:** An incremental encoder generates a series of pulses as the motor rotates, with the frequency of the pulses proportional to the speed of the shaft. This encoder does not provide absolute position measurement, but rather provides information about the change in position over time. Often used in applications where speed and relative position are more important than absolute position, such as conveyors or positioning stages.
 
 Encoders can be analog or digital, and can use various technology to detect shaft rotation, including optical, magnetic, and capacitive sensors. 
 
 This project does not need absolute positioning, thus we will be using incremental encoders. This will allow us to determine velocity, positioning, and orientation of the robot. We can also implement a PID Controller for optical control of the speed of the robot given the feedback of the encoder.
 
-## Brief PID Control Explanation
+## Brief Introduction to PID Control Systems
 
 ![Encoder](https://www.thorlabs.com/images/TabImages/PID2.jpg)
 
@@ -51,4 +51,3 @@ An encoder typically has the following I/O:
 
 The Out A will be used for our state detection (via Interrupt) and Out B will be used for finding the direction. Output A/B will be connected as Digital Outputs to the Arduino. Note: The image shown is a dedicated rotary switch and is not connected to a DC motor. However, a DC motor with a built-in encoder will have the Out A/B built-in to the motor I/O.
 
-Next, we will need to calculate RPM for the DC motor in order to find velocity using the diameter of the wheel. 
