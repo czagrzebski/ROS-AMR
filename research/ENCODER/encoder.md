@@ -4,14 +4,14 @@
 ## Overview
  A DC motor encoder is a device that is used to measure the speed and position of a direct current motor. It typically consists of a sensor that is attached to the motor shaft, which generates pulses as the shaft rotates. These pulses are converted into a digital signal that can be read by a control systems, allowing the motor's speed and position to be monitored and controlled. The data gathered by the encoder will be used in combination with an IMU for odometry the fundamental algorithm for computing robotic motion. 
 
- There are two main types of motor encoders
+ There are two main types of motor encoders:
     
 1. **Absolute encoders:** Gives a unique digital code for each distinct position of the motor shaft, allowing the exact position of the shaft to be determined at any time. Often used where precise position is required, especially in robot or machine tool applications
 2. **Incremental Encoders:** An incremental encoder generates a series of pulses as the motor rotates, with the frequency of the pulses proportional to the speed of the shaft. This encoder does not provide absolute position measurement, but rather provides information about the change in position over time. Often used in applications where speed and relative position are more important than absolute position, such as conveyors or positioning stages.
 
 Encoders can be analog or digital, and can use various technology to detect shaft rotation, including optical, magnetic, and capacitive sensors. 
 
-This project does not need absolute positioning, thus we will be using incremental encoders. This will allow us to determine velocity, positioning, and orientation of the robot. We can also implement a PID Controller for optical control of the speed of the robot given the feedback of the encoder.
+This project does not need absolute positioning, thus we will be using incremental encoders. This will allow us to determine velocity, positioning, and orientation of the robot. We can also implement a PID Controller for optimal control of the speed of the robot given the feedback of the encoder.
 
 ## Brief Introduction to PID Control Systems
 
@@ -57,6 +57,8 @@ In order to determine the speed, we need to calculate the RPM of our motor. This
 
 To calculate RPM, we use the following equation:
 
-$RPM = \frac{revolutions}{minute} = \frac{(\text{Pulses Per Second} * 60)}{\text{Pulses Per Revolution}}$
+$RPM = \frac{revolutions}{minute} \rightarrow \frac{pulses}{second} * \frac{60 \text{ seconds}}{1 \text{ minute}} * \frac{1 \text { revolution}}{\text{X Pulses}}$
+
+$RPM = \frac{revolutions}{minute} \rightarrow \frac{(\text{Pulses Per Second} * 60)}{\text{Pulses Per Revolution}}$
 
 Pulses per second is the number of pulses monitored within a one second period. We then convert it to pulses per minute by multiplying it by 60, since we are looking for revolutions per minute and not per second. We then divide this by the constant Pulses Per Revolution, which can be calculated by measuring the amount of pulses when manually rotating the encoder $360\degree$.
