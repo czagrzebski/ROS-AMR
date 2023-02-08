@@ -36,7 +36,7 @@ As the motor spins, these contact pins generated a signal. When the knob is turn
 ![Alt text](https://lastminuteengineers.b-cdn.net/wp-content/uploads/arduino/rotary-encoder-working-animation.gif)
 
 When A changes state:
-- If $B \neq A$, the shaft is turned clockwise
+- If $B \neq A$, the shaft is turned clockwise 
   
   ![Alt text](https://lastminuteengineers.b-cdn.net/wp-content/uploads/arduino/rotary-encoder-output-pulses-in-clockwise-rotation.png)
 - If $B = A$, the shaft is turned counter clockwise
