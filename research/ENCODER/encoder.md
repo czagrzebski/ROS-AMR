@@ -23,6 +23,8 @@ $u(t) = K_pe(t)+K_i\int_{0}^{t}e(t)dt + K_p\frac{de}{dt}$
 
 Where $K_p$ = Proportional Gain, $K_i$ = Integral Gain, $K_d$ = Derivative Gain, $r(t)$ is the set point, $y(t)$ is the measured process variable, and $e(t) = r(t) - y(t)$. The $K$ constants can be tuned for a more stable controller to fix various issues such as rise time, overshoot, settling time, stability, and steady-state error. See the PID research document for more information (Not yet complete). 
 
+![Alt text](https://people.ece.cornell.edu/land/courses/ece4760/FinalProjects/s2012/fas57_nyp7/Site/images/pidtable.jpg)
+
 In context of the RC car, our $y(t)$ would be the actual speed of our RC car measured by the encoder, while the set point would be our desired speed. Our $e(t)$ would be our error and the PID control will calculate a new PWM value to achieved the desired set point.
 
 ## Calculate direction and speed of DC motor using an Encoder
