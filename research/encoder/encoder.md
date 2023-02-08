@@ -38,9 +38,9 @@ As the motor spins, these contact pins generated a signal. When the knob is turn
 When A changes state:
 - If $B \neq A$, the shaft is turned clockwise 
   
-  ![Alt text](https://lastminuteengineers.b-cdn.net/wp-content/uploads/arduino/rotary-encoder-output-pulses-in-clockwise-rotation.png)
+  ![Alt text](/media/rotary-encoder-output-pulses-in-clockwise-rotation.png)
 - If $B = A$, the shaft is turned counter clockwise
  
-    ![Alt text](https://lastminuteengineers.b-cdn.net/wp-content/uploads/arduino/rotary-encoder-output-pulses-in-anticlockwise-rotation.png)
+    ![Alt text](/media/rotary-encoder-output-pulses-in-anticlockwise-rotation.png)
 
 Thus, we can use this information to determine the direction that the motor is spinning. The A pin can be used for state detection to detect change in position of the shaft, which can then fire a subroutine to calculate the orientation of the movement. 
