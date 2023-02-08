@@ -44,3 +44,9 @@ When A changes state:
     ![Alt text](/media/rotary-encoder-output-pulses-in-anticlockwise-rotation.png)
 
 Thus, we can use this information to determine the direction that the motor is spinning. The A pin can be used for state detection to detect change in position of the shaft, which can then fire a subroutine to calculate the orientation of the movement. 
+
+An encoder typically has the following I/O:
+
+<img src="./../../media/rotary.jpeg" width="400">
+
+Where the Out A will be used for our state detection and Out B will be used for our direction comparison. Output A/B will be connected as Digital Outputs to the Arduino. Note: The image shown is a dedicated rotary switch and is not connected to a DC motor. However, a DC motor with a built-in encoder will have the Out A/B built-in to the motor I/O.
