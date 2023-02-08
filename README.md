@@ -1,6 +1,6 @@
 # ROS Automated Guided Vehicle
 
-A research project for developing an autonomous mobile robot using the ROS navigation stack. This project is still in the research phase and is not expected to be compeleted anytime in the near-future. 
+A research project for developing an autonomous mobile robot using the ROS navigation stack. This project is still in the research phase and is not expected to be completed anytime in the near-future. See the research folder for notes about the project as I am researching and learning robotics.  
 
 ## Phase One Goals
 - Design a chassis for a simplified version of the robot
