@@ -6,8 +6,8 @@
 
  There are two main types of motor encoders
     
-1. Absolute encoders: Gives a unique digital code for each distinct position of the motor shaft ,allowing the exact position of the shaft to be determined at any time. Often used where precise position is required, especially in robot or machine tool applications
-2. Incremental Encoders: An incremental encoder generates a series of pulses as the motor rotates, with the frequency of the pulses proportional to the speed of the shaft. This encoder does not provide absolute position measurement, but rather provides information about the change in position over time. Often used in applications where speed and relative position are more important than absolute position, such as conveyors or positioning stages.
+1. **Absolute encoders:** Gives a unique digital code for each distinct position of the motor shaft ,allowing the exact position of the shaft to be determined at any time. Often used where precise position is required, especially in robot or machine tool applications
+2. **Incremental Encoders:** An incremental encoder generates a series of pulses as the motor rotates, with the frequency of the pulses proportional to the speed of the shaft. This encoder does not provide absolute position measurement, but rather provides information about the change in position over time. Often used in applications where speed and relative position are more important than absolute position, such as conveyors or positioning stages.
 
 Encoders can be analog or digital, and can use various technology to detect shaft rotation, including optical, magnetic, and capacitive sensors. 
 
