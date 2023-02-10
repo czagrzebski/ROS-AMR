@@ -15,6 +15,8 @@ This project does not need absolute positioning, thus we will be using increment
 
 ## Brief Introduction to PID Control Systems
 
+A PID controller will be used to control the speed of the DC motor using the feedback given by the encoder. This will allow us to control the PWM value to maintain an output such that there is little error in the closed-loop operation of the dynamic system. 
+
 ![Encoder](https://www.thorlabs.com/images/TabImages/PID2.jpg)
 
 The output of the PID control circuit, $u(t)$, is given as:
@@ -25,7 +27,7 @@ Where $K_p$ = Proportional Gain, $K_i$ = Integral Gain, $K_d$ = Derivative Gain,
 
 ![Alt text](https://people.ece.cornell.edu/land/courses/ece4760/FinalProjects/s2012/fas57_nyp7/Site/images/pidtable.jpg)
 
-In context of the RC car, our $y(t)$ would be the actual speed of our RC car measured by the encoder, while the set point would be our desired speed. Our $e(t)$ would be our error and the PID control will calculate a new PWM value to achieved the desired set point.
+In context of the RC car, the $y(t)$ would be the actual speed of the RC car measured by the encoder, while the set point would be the desired speed. The $e(t)$ would be the error and the PID control will calculate a new PWM value to achieved the desired set point.
 
 ## Calculate direction and speed of DC motor using an Encoder
 
