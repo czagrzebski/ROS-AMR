@@ -15,6 +15,7 @@ A research project for developing an autonomous mobile robot using the ROS navig
 <img src="./media/phase_one_cad.png"  width="600" >
 
 ## Phase Two Goals
+- Design a differential drive AGV
 - Integrate High-Performance SBC with ROS
 - Setup Communication between embedded controller and ROS
 - Create initial ROS structure with Teleop of Robot
