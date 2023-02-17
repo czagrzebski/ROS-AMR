@@ -21,6 +21,8 @@ A research project for developing an autonomous mobile robot using the ROS navig
 - Integrate Bosch IMU and Wheel Encoder using localization package and Extended Kalman Filter (EKF)
 - Aquire SLAM Data with RPLidar A1M8 using ROS libraries and packages
 
+<img src="./media/phase_two_cad.png"  width="600" >
+
 ## Phase Three Goals
 - Finalize Localization 
 - Autonomously Navigate to Destination
