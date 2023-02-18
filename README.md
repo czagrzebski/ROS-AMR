@@ -16,10 +16,10 @@ A research project for developing an autonomous mobile robot using the ROS navig
 
 ## Phase Two Goals
 - Design a differential drive AGV
-- Integrate High-Performance SBC with ROS
-- Setup Communication between embedded controller and ROS
-- Create initial ROS structure with Teleop of Robot
-- Integrate Bosch IMU and Wheel Encoder using localization package and Extended Kalman Filter (EKF)
+- Integrate SBC with Ubuntu & ROS
+- Setup Communication between embedded controller and ROS using rosserial
+- Setup Hardware Interfaces in ROS
+- Implement ROS Navigation Stack
 - Aquire SLAM Data with RPLidar A1M8 using ROS libraries and packages
 
 <img src="./media/phase_two_cad.png"  width="600" >
