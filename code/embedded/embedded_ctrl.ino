@@ -37,15 +37,15 @@ long lastUpdate = 0;
 const int wheelDiameter = 65;
 
 // PID Control Variables
-double velSetPointA = 0; // velocity setpoint for motor A
-double velSetPointB = 0; // velocity setpoint for motor B
-double velMotorAOutput = 0; // process output for motor A (calculated velocity)
-double velMotorBOutput = 0; // process output for motor B (calculated velocity)
+double velSetPointA = 0; // velocity setpoint for motor A (in m/s)
+double velSetPointB = 0; // velocity setpoint for motor B (in m/s)
+double velMotorAOutput = 0; // process output for motor A (calculated velocity in m/s)
+double velMotorBOutput = 0; // process output for motor B (calculated velocity in m/s)
 double pwmMotorA = 0; // the control variable for motor A
 double pwmMotorB = 0; // the control variable for motor B
-double kp = 0;
-double ki = 0;
-double kd = 0;
+double kp = 0; // proportional Constant
+double ki = 0; // integral constant
+double kd = 0; // derivative constant
 
 // Setup PID Controller for both variables
 PID pidMotorA = PID(&pwmMotorA, &velMotorAOutput, &velSetPointA, kp, ki, kd, DIRECT);
@@ -55,12 +55,12 @@ PID pidMotorB = PID(&pwmMotorB, &velMotorBOutput, &velSetPointB, kp, ki, kd, DIR
 Motor motorA = Motor(0, 0, 0);
 Motor motorB = Motor(0, 0, 0);
 
-// ROS Node Communication
+// ROS Node Serial Communication
 ros::NodeHandle nh;
 std_msgs::String str_msg;
 ros::Publisher motor_data("motor_data", &str_msg);
 
-// Test Communication
+// Test Message for Communication
 char msg[5] = "Test";
 
 void setup() {
@@ -78,7 +78,7 @@ void setup() {
 
     // Attach Interrupts to ISR
     attachInterrupt(digitalPinToInterrupt(motorAHallA), doMotorATick, RISING);
-    attachInterrupt(digitalPinToInterrupt(motorBHallB), doMotorBTick, RISING);
+    attachInterrupt(digitalPinToInterrupt(motorBHallA), doMotorBTick, RISING);
 
     // Initialize ROS 
     nh.initNode();
@@ -110,6 +110,7 @@ void calculateMotorVelocity() {
     velMotorAOutput = ((((motorATicks * 60)/ENC_COUNT_REV) * (PI * wheelDiameter))/60)/1000;
     velMotorBOutput = ((((motorBTicks * 60)/ENC_COUNT_REV) * (PI * wheelDiameter))/60)/1000;
     
+    // Reset tick count for next iteration
     motorATicks = 0;
     motorBTicks = 0;
 }
