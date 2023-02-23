@@ -1,4 +1,4 @@
-# DC Motor Encoder Research (Not Finished)
+# DC Motor Encoder Research 
 
 
 ## Overview
@@ -27,7 +27,9 @@ Where $K_p$ = Proportional Gain, $K_i$ = Integral Gain, $K_d$ = Derivative Gain,
 
 ![Alt text](https://people.ece.cornell.edu/land/courses/ece4760/FinalProjects/s2012/fas57_nyp7/Site/images/pidtable.jpg)
 
-In context of the RC car, the $y(t)$ would be the actual speed of the RC car measured by the encoder, while the set point would be the desired speed. The $e(t)$ would be the error and the PID control will calculate a new PWM value to achieved the desired set point.
+In context of the AGV, the $y(t)$ would be the actual speed of the RC car measured by the encoder, while the set point would be the desired speed. The $e(t)$ would be the error and the PID control will calculate a new PWM value to achieved the desired set point.
+
+The [Arduino PID library](https://github.com/br3ttb/Arduino-PID-Library) will be used later on to handle the calculations for input signals. The Arduino will take velocity commands via ROSSerial and hand this information to our PID controller, which in return will calculate a PWM value to achieve the desired result. 
 
 ## Calculate direction and speed of DC motor using an Encoder
 
@@ -95,6 +97,62 @@ void onHallTrigger() {
 
 ```
 
-When the ```CLK``` input signal goes high (RISING), the signal is detected by the microcontrollers interrupt request (IRQ) controller. This event is binded using the ```attachInterrupt``` routine. The IRQ sets a flag for the interrupt with the highest priority and then saves the Program Counter (PC), status registers, and other relevant registers onto the stack. The microcontroller then jumps to the address of the ISR function ```onHallTrigger``` and increments ```encoderTicks```. Because ```encoderTicks``` is shared between the normal program, we need to declare it as ```volatile``` to prevent a race condition from occurring when the registers are restored from the stack (does not cache values in registers or memory). 
+When the ```CLK``` input signal goes high (RISING), the signal is detected by the microcontrollers interrupt request (IRQ) controller. This event is binded using the ```attachInterrupt``` routine. The IRQ sets a flag for the interrupt with the highest priority and then saves the Program Counter (PC), status registers, and other relevant registers onto the stack. The microcontroller then jumps to the address of the ISR function ```onHallTrigger``` and increments ```encoderTicks```. Because ```encoderTicks``` is shared between the normal program, we need to declare it as ```volatile``` to prevent a race condition from occurring when the registers are restored from the stack (does not cache values in registers or memory). When the ISR is ran, it checks the status of both sensors to determine direction of the drive shaft.
 
 Upon the start of the program, the encoderTicks is initialized to zero. Rotating the drive shaft will cause that value to increment. To find the pulses per revolution, rotate the drive shaft 360 degrees and record the value that is sent back via serial. 
+
+Now that we have the number of ticks per revolution, we can create program to determine the current speed of the wheel by transforming angular velocity.
+
+```c++
+#include <Arduino.h>
+#include "motor.h"
+
+// Number of motor encoder ticks per shaft revolution (from ticker counter program)
+#define ENC_COUNT_REV 146
+
+// Hall Sensor Pins for Motor A & B
+#define motorAHallA 2
+#define motorAHallB 3
+
+// Stores the number of hall encoder ticks for each motor
+volatile long motorATicks = 0;
+
+// Controller Update Interval
+const int updateRate = 1000;
+long lastUpdate = 0;
+
+// Diameter of the wheels (in mm)
+const int wheelDiameter = 65;
+
+// Setup Motors (Pins are currently undefined)
+Motor motorA = Motor(4, 5, 6);
+
+void setup() {
+    // Attach Interrupts to ISR
+    attachInterrupt(digitalPinToInterrupt(motorAHallA), onHallATrigger, RISING);
+}
+
+void loop() {
+   if(millis() - lastUpdate >= updateRate) {
+        // Calculate new setpoint
+        calculateMotorVelocity();
+        lastUpdate = millis();
+   }
+}
+
+void calculateMotorVelocity() {
+    velMotorAOutput = ((motorATicks/ENC_COUNT_REV) * (PI * wheelDiameter))/1000;
+    Serial.println(velMotorAOutput);
+    
+    // Reset tick count for next iteration
+    motorATicks = 0;
+}
+
+// Interrupt Service Routine for Motor A Encoder
+void onHallATrigger() {
+    motorATicks++;
+}
+
+```
+
+This program will calculate the velocity of our wheel in m/s. The ```ENC_COUNT_REV``` definition holds the number of pulses per rotation that we determined using the first program.
