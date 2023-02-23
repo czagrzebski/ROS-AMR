@@ -55,8 +55,7 @@ An encoder typically has the following I/O:
 
 The Out A will be used for our state detection (via Hardware Interrupt) and Out B will be used for finding the direction. Out A/B will be connected as Digital inputs to the Arduino. Note: The image shown is a dedicated rotary switch and is not connected to a DC motor. However, a DC motor with a built-in encoder will have the Out A/B built-in to the motor I/O.
 
-In order to determine the speed, we need to calculate the RPM of our motor. This will then allow us to use the circumference of our wheel to calculate the speed at which our robot is travelling. 
-
+In order to determine the speed, we need to calculate the RPM of our motor. This will then allow us to use the circumference of our wheel to convert angular to linear velocity. 
 To calculate RPM, we use the following equation:
 
 $RPM = \frac{revolutions}{minute} \rightarrow \frac{pulses}{second} * \frac{60 \text{ seconds}}{1 \text{ minute}} * \frac{1 \text { revolution}}{\text{X Pulses}}$
@@ -64,3 +63,38 @@ $RPM = \frac{revolutions}{minute} \rightarrow \frac{pulses}{second} * \frac{60 \
 $RPM = \frac{revolutions}{minute} \rightarrow \frac{(\text{Pulses Per Second} * 60)}{\text{Pulses Per Revolution}}$
 
 Pulses per second is the number of pulses monitored within a one second period. We then convert it to pulses per minute by multiplying it by 60, since we are looking for revolutions per minute and not per second. We then divide this by the constant Pulses Per Revolution, which can be calculated by measuring the amount of pulses when manually rotating the encoder $360\degree$.
+
+The following program can be used to determine the number of pulses for each revolution of the drive shaft. 
+
+```c++
+#include <Arduino.h>
+
+const byte hallA = 2; // CLK Input
+const byte hallB = 3; // DT Input
+volatile int encoderTicks = 0; // Number of ticks (volatile)
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(hallA, INPUT);
+  pinMode(hallB, INPUT);
+  attachInterrupt(digitalPinToInterrupt(hallA), onHallTrigger, RISING);
+}
+
+void loop() {
+  Serial.println(encoderTicks);
+}
+
+// Hall Interrupt Service Routine (ISR)
+void onHallTrigger() {
+  if(digitalRead(hallA) != digitalRead(hallB)) {
+    encoderTicks++;
+  } else {
+    encoderTicks--;
+  }
+}
+
+```
+
+When the ```CLK``` input signal goes high (RISING), the signal is detected by the microcontrollers interrupt request (IRQ) controller. This event is binded using the ```attachInterrupt``` routine. The IRQ sets a flag for the interrupt with the highest priority and then saves the Program Counter (PC), status registers, and other relevant registers onto the stack. The microcontroller then jumps to the address of the ISR function ```onHallTrigger``` and increments ```encoderTicks```. Because ```encoderTicks``` is shared between the normal program, we need to declare it as ```volatile``` to prevent a race condition from occurring when the registers are restored from the stack (does not cache values in registers or memory). 
+
+Upon the start of the program, the encoderTicks is initialized to zero. Rotating the drive shaft will cause that value to increment. To find the pulses per revolution, rotate the drive shaft 360 degrees and record the value that is sent back via serial. 
