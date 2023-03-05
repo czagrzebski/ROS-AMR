@@ -25,9 +25,16 @@ void Motor::forward() {
 
 void Motor::backward() {
     digitalWrite(_pinIN1, LOW);
-    digitalWrite(_pinIN1, HIGH);
+    digitalWrite(_pinIN2, HIGH);
 
     analogWrite(_pinEnable, _pwmValue);
+}
+
+void Motor::brake() {
+    analogWrite(_pinEnable, 255);
+
+    digitalWrite(_pinIN1, HIGH);
+    digitalWrite(_pinIN2, HIGH);
 }
 
 void Motor::stop() {

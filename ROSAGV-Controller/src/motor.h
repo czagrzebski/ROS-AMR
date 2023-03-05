@@ -9,7 +9,7 @@ class Motor {
         void forward();
         void backward();
         void stop();
-        void reset();
+        void brake();
         void setSpeed(unsigned short pwmValue);
     private:
         byte _pinEnable;
