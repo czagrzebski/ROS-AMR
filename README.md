@@ -1,12 +1,12 @@
-# ROS Automated Guided Vehicle
+# ROS Automated Guided Vehicle Research Project
 
-A research project for developing an autonomous mobile robot using ROS and the ROS navigation stack. This project is still in the research phase and is not expected to be completed anytime in the near-future. See the research folder for notes about the project as I am researching and learning robotics.  
+A research project for developing an autonomous mobile robot using ROS and the ROS navigation stack. This project is still in the research phase and is not expected to be completed anytime in the near-future. See the research folder for notes about the project as I am researching and learning differential drive robots.  
 
 ## Phase One Goals [In-Progress]
 - [x] Design a chassis for a simplified version of the robot
 - [x] Integrate L298N Motor Controllers with TT 3-6V DC Motors
 - [x] Develop Firmware for MEGA2560
-- [ ] Test/calibrate DC encoders for Phase Two Integration
+- [x] Test/calibrate DC encoders for Phase Two Integration
 - [ ] Test/calibrate IMU for Phase Two Integration
 
 <img src="./media/phase_one_cad.png"  width="600" >
