@@ -16,6 +16,7 @@ A research project for developing an autonomous mobile robot using ROS and the R
 - [ ] Integrate SBC with Ubuntu & ROS Noetic
 - [ ] Establish communication between embedded controller and ROS using rosserial package
 - [ ] Setup Hardware Interfaces in ROS for motor control and LIDAR data aquisition
+- [ ] PID Tuning of motors for velocity control
 - [ ] Setup Remote Control of Robot
 - [ ] Implement ROS Navigation Stack (Localization, Costmap, Navigation)
 - [ ] Aquire SLAM Data with RPLidar A1M8 using ROS libraries and packages
