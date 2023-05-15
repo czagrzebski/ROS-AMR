@@ -21,9 +21,7 @@
 
     <!-- BASE LINK -->
 
-    <link name="base_link">
-
-    </link>
+    <link name="base_link" />
 
     <!-- CHASSIS LINK -->
 
@@ -33,7 +31,7 @@
         <origin xyz="-0.1 0 0"/>
     </joint>
 
-    <link name="chassis">
+     <link name="chassis">
         <visual>
             <origin xyz="0.15 0 0.075"/>
             <geometry>
@@ -51,62 +49,58 @@
             <origin xyz="0.15 0 0.075" rpy="0 0 0"/>
         </xacro:inertial_box>
     </link>
+    
 
     <!-- LEFT WHEEL LINK -->
     
     <joint name="left_wheel_joint" type="continuous">
-        <parent link="chassis"/>
+        <parent link="base_link"/>
         <child link="left_wheel"/>
-        <origin xyz="0 0.175 0" rpy="-${pi/2} 0 0"/> <!-- Set Origin and Rotate 90 degrees -->
-        <axis xyz="0 0 1"/> <!-- Rotate across ZAXIS-->
+        <origin xyz="0 0.175 0" rpy="-${pi/2} 0 0" />
+        <axis xyz="0 0 1"/>
     </joint>
 
     <link name="left_wheel">
         <visual>
-            <origin xyz="0 0 0"/>
             <geometry>
                 <cylinder radius="0.05" length="0.04"/>
             </geometry>
             <material name="black"/>
         </visual>
         <collision>
-            <origin xyz="0 0 0"/>
             <geometry>
                 <cylinder radius="0.05" length="0.04"/>
             </geometry>
         </collision>
-        <xacro:intertial_cylinder mass="0.1" radius="0.05" length="0.04">
+        <xacro:inertial_cylinder mass="0.1" length="0.04" radius="0.05">
             <origin xyz="0 0 0" rpy="0 0 0"/>
-        </xacro:intertial_cylinder>
+        </xacro:inertial_cylinder>
     </link>
-
 
     <!-- RIGHT WHEEL LINK -->
     
-    <joint name="right_wheel_joint" type="continuous">
-        <parent link="chassis"/>
+     <joint name="right_wheel_joint" type="continuous">
+        <parent link="base_link"/>
         <child link="right_wheel"/>
-        <origin xyz="0 -0.175 0" rpy="${pi/2} 0 0"/> <!-- Set Origin and Rotate 90 degrees -->
-        <axis xyz="0 0 -1"/> <!-- Rotate across ZAXIS-->
+        <origin xyz="0 -0.175 0" rpy="${pi/2} 0 0" />
+        <axis xyz="0 0 -1"/>
     </joint>
 
     <link name="right_wheel">
         <visual>
-            <origin xyz="0 0 0"/>
             <geometry>
                 <cylinder radius="0.05" length="0.04"/>
             </geometry>
             <material name="black"/>
         </visual>
         <collision>
-            <origin xyz="0 0 0"/>
             <geometry>
                 <cylinder radius="0.05" length="0.04"/>
             </geometry>
         </collision>
-        <xacro:intertial_cylinder mass="0.1" radius="0.05" length="0.04">
+        <xacro:inertial_cylinder mass="0.1" length="0.04" radius="0.05">
             <origin xyz="0 0 0" rpy="0 0 0"/>
-        </xacro:intertial_cylinder>
+        </xacro:inertial_cylinder>
     </link>
 
     <!-- Caster-->
@@ -128,9 +122,9 @@
                 <sphere radius="0.05"/>
             </geometry>
         </collision>
-        <xacro:intertial_sphere mass="0.1" radius="0.05"> <!-- Inertial Sphere -->
+        <xacro:inertial_sphere mass="0.1" radius="0.05"> <!-- Inertial Sphere -->
             <origin xyz="0 0 0" rpy="0 0 0"/>
-        </xacro:intertial_sphere>
+        </xacro:inertial_sphere>
     </link>
 
 </robot>
