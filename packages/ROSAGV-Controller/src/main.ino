@@ -68,14 +68,14 @@ geometry_msgs::Vector3Stamped speedCtrlMsg;
 
 // ROS Node (Pub and Sub) Initialization
 ros::NodeHandle nh;
-ros::Publisher speedPub("speed", &speedMsg);
+ros::Publisher speedPub("wheel_velocity", &speedMsg);
 
 void speedCtrlCallback(const geometry_msgs::Vector3Stamped& msg) {
     velSetPointA = msg.vector.x;
     velSetPointB = msg.vector.y;
 }
 
-ros::Subscriber<geometry_msgs::Vector3Stamped> speedCtrlSub("speed_ctrl", &speedCtrlCallback);
+ros::Subscriber<geometry_msgs::Vector3Stamped> speedCtrlSub("wheel_velocity_cmd", &speedCtrlCallback);
 
 void setup() {
     nh.initNode();
