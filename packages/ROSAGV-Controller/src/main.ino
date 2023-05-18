@@ -10,13 +10,11 @@
 #include <Arduino.h>
 #include <PID_v1.h>
 #include <ros.h>
-#include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Vector3Stamped.h>
-#include <std_msgs/String.h>
 #include "motor.h"
 
 // Encoder Ticks per Revolution
-#define ENC_COUNT_REV 146.0
+#define ENC_COUNT_REV 576.0
 
 // Hall Sensor Pins for Motor A & B
 #define motorAHallA 2
@@ -25,105 +23,130 @@
 #define motorBHallB 19
 
 // PID Update Frequency (in Hz)
-#define PID_UPDATE_FREQ 100
+#define PID_UPDATE_FREQ 20.0
+
+// Publish Update Frequency (in ms)
+#define PUBLISH_UPDATE_SPEED 10
 
 // Stores the number of hall encoder ticks for each motor
 volatile long motorATicks = 0;
 volatile long motorBTicks = 0;
 
 // Controller Update Interval
-const int updateRate = (1/PID_UPDATE_FREQ) * 1000;
-long lastUpdate = 0;
-long lastOdomUpdate = 0;
+unsigned long updateRate = ((double) (1.0/PID_UPDATE_FREQ) * 1000);
+unsigned long lastUpdate = 0;
+unsigned long lastOdomUpdate = 0;
 
 // Diameter of the wheel (in mm)
 const double wheelDiameter = 65.0; 
 
 // PID Control Variables
-double velSetPointA; // the setpoint for motor A (in m/s)
-double velSetPointB; // the setpoint for motor B (in m/s
-double velMotorAOutput; // process output for motor A (in m/s)
-double velMotorBOutput; // process output for motor B (in m/s)
-double pwmMotorA; // PWM value for motor A
-double pwmMotorB; // PWM value for motor B
+double velSetPointA = 0.4; // the setpoint for motor A (in m/s)
+double velMotorAOutput = 0; // process output for motor A (in m/s)
+double pwmMotorA = 0; // PWM value for motor A
+
+double velSetPointB = 0.4; // the setpoint for motor B (in m/s)
+double velMotorBOutput = 0; // process output for motor B (in m/s)
+double pwmMotorB = 0; // PWM value for motor B
 
 // TODO: Get from ROS Parameter Server
-double kp = 0.1; // proportional Constant
-double ki = 0.3; // integral constant
-double kd = 0.001; // derivative constant
+double kp = 325; // proportional Constant
+double ki = 600; // integral constant
+double kd = 0; // derivative constant
 
 // Setup PID Controller for both variables
 PID pidMotorA = PID(&velMotorAOutput, &pwmMotorA, &velSetPointA, kp, ki, kd, DIRECT);
 PID pidMotorB = PID(&velMotorBOutput, &pwmMotorB, &velSetPointB, kp, ki, kd, DIRECT);
 
 // Setup Motors (Pins are currently undefined)
-Motor motorA = Motor(0, 0, 0);
-Motor motorB = Motor(0, 0, 0);
+Motor motorA = Motor(8, 9, 10);
+Motor motorB = Motor(11, 12, 13);
 
-// ROS Node Serial Communication
+// ROS Messages
+geometry_msgs::Vector3Stamped speedMsg;
+geometry_msgs::Vector3Stamped speedCtrlMsg;
+
+// ROS Node (Pub and Sub) Initialization
 ros::NodeHandle nh;
-std_msgs::String str_msg;
-geometry_msgs::Vector3Stamped speed_msg;   
-ros::Publisher speed("speed", &speed_msg);
+ros::Publisher speedPub("speed", &speedMsg);
+
+void speedCtrlCallback(const geometry_msgs::Vector3Stamped& msg) {
+    velSetPointA = msg.vector.x;
+    velSetPointB = msg.vector.y;
+}
+
+ros::Subscriber<geometry_msgs::Vector3Stamped> speedCtrlSub("speed_ctrl", &speedCtrlCallback);
 
 void setup() {
-    Serial.begin(9600);
+    nh.initNode();
+    nh.loginfo('Initalize Embedded Motor Controller');
 
-    // Set PID Mode to Automatic
+    nh.advertise(speedPub);
+    nh.subscribe(speedCtrlSub);
+
+    pidMotorA.SetSampleTime(updateRate);
+    pidMotorA.SetOutputLimits(0, 255);
+    motorA.setSpeed(0);
+    motorA.forward();
     pidMotorA.SetMode(AUTOMATIC);
+
+    pidMotorB.SetSampleTime(updateRate);
+    pidMotorB.SetOutputLimits(0, 255);
+    motorB.setSpeed(0);
+    motorB.forward();
     pidMotorB.SetMode(AUTOMATIC);
 
-    // Disable PID Sample Time
-    pidMotorA.SetSampleTime(1);
-    pidMotorB.SetSampleTime(1);
-
-    // Set Max PWM Range
-    pidMotorA.SetOutputLimits(0, 255);
-    pidMotorB.SetOutputLimits(0, 255);
-
-    // Set Initial Setpoints for testing (in m/s)
-    velSetPointA = 0.25;
-    velSetPointB = 0.25;
-
-    // Attach Interrupts to ISR
+    // Attach Interrupts to ISR for Hall Sensors (Motor A)
     attachInterrupt(digitalPinToInterrupt(motorAHallA), doMotorATick, RISING);
-    attachInterrupt(digitalPinToInterrupt(motorBHallA), doMotorBTick, RISING);
+    attachInterrupt(digitalPinToInterrupt(motorAHallA), doMotorATick, FALLING);
+    attachInterrupt(digitalPinToInterrupt(motorAHallB), doMotorATick, RISING);
+    attachInterrupt(digitalPinToInterrupt(motorAHallB), doMotorATick, FALLING);
 
-    // Initialize ROS Node and Publisher
-    //nh.initNode();
-    //nh.advertise(speed);
+    // Attach Interrupts to ISR for Hall Sensors (Motor B)
+    attachInterrupt(digitalPinToInterrupt(motorBHallA), doMotorBTick, RISING);
+    attachInterrupt(digitalPinToInterrupt(motorBHallA), doMotorBTick, FALLING);
+    attachInterrupt(digitalPinToInterrupt(motorBHallB), doMotorBTick, RISING);
+    attachInterrupt(digitalPinToInterrupt(motorBHallB), doMotorBTick, FALLING);
+
+    nh.loginfo('Initialization Complete');
+
 }
 
 void loop() {
-   if(millis() - lastUpdate >= updateRate) {
-        // Calculate Current velocity 
+    if(millis() - lastUpdate >= updateRate) {
         calculateMotorVelocity();
-        
-        // Calculate new PWM params
         pidMotorA.Compute();
         pidMotorB.Compute();
-
-        // Set Speed using new values
         motorA.setSpeed(pwmMotorA);
         motorB.setSpeed(pwmMotorB);
 
-        lastUpdate = millis();
-   }
+        // Print out PID values for motor A
+        //Serial.print(velSetPointA);
+        //Serial.print("\t");
+        //Serial.print(pwmMotorA);
+        //Serial.print("\t");
+        //Serial.print(velMotorAOutput);
 
-   // Check for async callbacks
-//   nh.spinOnce();
+        //Serial.print("\t");
+
+        // Print out PID values for motor B
+        //Serial.print(pwmMotorB);
+        //Serial.print("\t");
+        //Serial.println(velMotorBOutput);
+
+        publishSpeed();
+        lastUpdate = millis();
+    }
+
+    nh.spinOnce();
 }
 
 // Calculate the current velocity of the motors
 void calculateMotorVelocity() {
-    double dts = 0;
-
-    // Calculate time elapsed since last odom update
-    dts = (millis() - lastOdomUpdate)/1000.0;
 
     // Calculate current velocity of each motor
-    velMotorAOutput = angularToLinearVelocity(angleToAngularVelocity(ticksToAngle(motorATicks), dts), wheelDiameter/2);
-    velMotorBOutput = angularToLinearVelocity(angleToAngularVelocity(ticksToAngle(motorBTicks), dts), wheelDiameter/2);
+    velMotorAOutput = angularToLinearVelocity(angleToAngularVelocity(ticksToAngle(motorATicks), 50.0/1000.0), wheelDiameter);
+    velMotorBOutput = angularToLinearVelocity(angleToAngularVelocity(ticksToAngle(motorBTicks), 50.0/1000.0), wheelDiameter);
 
     // Reset tick count for next iteration
     motorATicks = 0;
@@ -131,16 +154,20 @@ void calculateMotorVelocity() {
 
     lastOdomUpdate = millis();
 
-    // For Debugging
-    //Serial.print("velocity:");
-    //Serial.print(velMotorAOutput);
-    //Serial.println();
+}
 
+void publishSpeed() {
+    // Construct ROS Message
+    speedMsg.header.stamp = nh.now();
+    speedMsg.vector.x = velMotorAOutput;
+    speedMsg.vector.y = velMotorBOutput;
+    speedMsg.vector.z = 0;
+    speedPub.publish(&speedMsg);
 }
 
 // Convert ticks to angle (in radians)
 double ticksToAngle(long ticks) { 
-    return (double) (ticks / ENC_COUNT_REV) * 2 * PI;
+    return ((double) ticks / ENC_COUNT_REV) * 2.0 * PI;
 }
 
 // Convert angle (in radians) to angular velocity (in rad/s)
@@ -158,7 +185,7 @@ void doMotorATick() {
     motorATicks++;
 }
 
-// Interrupt Service Routine for Motor B Encoder
 void doMotorBTick() {
     motorBTicks++;
 }
+
