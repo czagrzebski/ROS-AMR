@@ -28,20 +28,21 @@
 #define PID_UPDATE_FREQ 20.0
 
 // Publish Update Frequency (in ms)
-#define PUBLISH_UPDATE_SPEED 10
+#define PUBLISH_UPDATE_SPEED 100
 
 // Stores the number of hall encoder ticks for each motor
 volatile long motorATicks = 0;
 volatile long motorBTicks = 0;
 
 // Motor Angles (for Joint State Publisher)
-double motorAAngle = 0;
-double motorBAngle = 0;
+float motorAAngle = 0;
+float motorBAngle = 0;
 
 // Controller Update Interval
 unsigned long updateRate = ((double) (1.0/PID_UPDATE_FREQ) * 1000);
 unsigned long lastUpdate = 0;
 unsigned long lastOdomUpdate = 0;
+unsigned long lastPublish = 0;
 
 // Diameter of the wheel (in mm)
 const double wheelDiameter = 65.0; 
@@ -91,8 +92,15 @@ void setup() {
     nh.initNode();
     nh.loginfo('Initalize Embedded Motor Controller');
 
+    jointStatesMsg.name_length = 2;
+    jointStatesMsg.position_length = 2;
+    jointStatesMsg.velocity_length = 2;
+    jointStatesMsg.effort_length = 2;
+    jointStatesMsg.name = jointStateNames;
+   
+
     nh.subscribe(speedCtrlSub);
-    nh.publish(jointStates);
+    nh.advertise(jointStates);
 
     pidMotorA.SetSampleTime(updateRate);
     pidMotorA.SetOutputLimits(0, 255);
@@ -125,6 +133,7 @@ void loop() {
     if(millis() - lastUpdate >= updateRate) {
         calculateMotorVelocity();
 
+        // Set Motor A Speed
         if(velSetPointA == 0) {
             motorA.stop();
         } else {
@@ -132,6 +141,14 @@ void loop() {
             motorA.setSpeed(pwmMotorA);
         }
 
+        // Set Motor A Direction 
+        if(velSetPointA > 0) {
+            motorA.forward();
+        } else {
+            motorA.backward();
+        }
+
+        // Set Motor B Speed
         if(velSetPointB == 0) {
             motorB.stop();
         } else {
@@ -139,8 +156,19 @@ void loop() {
             motorB.setSpeed(pwmMotorB);
         }
 
-        publishState();
+        // Set Motor B Direction 
+        if(velSetPointB > 0) {
+            motorB.forward();
+        } else {
+            motorB.backward();
+        }
+
         lastUpdate = millis();
+    }
+
+    if(millis() - lastPublish >= PUBLISH_UPDATE_SPEED) {
+        publishState();
+        lastPublish = millis();
     }
 
     nh.spinOnce();
@@ -148,15 +176,27 @@ void loop() {
 
 // Calculate the current velocity of the motors
 void calculateMotorVelocity() {
-    double deltaAngleMotorA = ticksToAngle(motorATicks);
-    double deltaAngleMotorB = ticksToAngle(motorBTicks);
+    float deltaAngleMotorA = ticksToAngle(motorATicks);
+    float deltaAngleMotorB = ticksToAngle(motorBTicks);
 
     // Calculate current velocity of each motor
-    velMotorAOutput = angularToLinearVelocity(angleToAngularVelocity(deltaAngleMotorA, 50.0/1000.0), wheelDiameter);
-    velMotorBOutput = angularToLinearVelocity(angleToAngularVelocity(deltaAngleMotorB, 50.0/1000.0), wheelDiameter);
+    velMotorAOutput = angularToLinearVelocity(angleToAngularVelocity(abs(deltaAngleMotorA), 50.0/1000.0), wheelDiameter);
+    velMotorBOutput = angularToLinearVelocity(angleToAngularVelocity(abs(deltaAngleMotorB), 50.0/1000.0), wheelDiameter);
 
     motorAAngle += deltaAngleMotorA;
     motorBAngle += deltaAngleMotorB;
+
+    // Normalize angle to be between 0 and 2PI
+    motorAAngle = fmod(motorAAngle, 2 * PI);
+    motorBAngle = fmod(motorBAngle, 2 * PI);
+
+    if(motorAAngle < 0) {
+        motorAAngle += 2 * PI;
+    }
+
+    if(motorBAngle < 0) {
+        motorBAngle += 2 * PI;
+    }
 
     // Reset tick count for next iteration
     motorATicks = 0;
@@ -177,7 +217,6 @@ void publishState() {
     jointStatesMsg.position = jointStatePosition;
     jointStatesMsg.velocity = jointStateVelocity;
     jointStatesMsg.effort = jointStateEffort;
-    nh.loginfo('Publishing Joint States for Hardware Interface');
     jointStates.publish(&jointStatesMsg);
 }
 
