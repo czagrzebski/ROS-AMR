@@ -11,6 +11,8 @@
 #include <PID_v1.h>
 #include <ros.h>
 #include <geometry_msgs/Vector3Stamped.h>
+#include <sensor_msgs/JointState.h>
+#include <sensor_msgs/Imu.h>
 #include "motor.h"
 
 // Encoder Ticks per Revolution
@@ -31,6 +33,10 @@
 // Stores the number of hall encoder ticks for each motor
 volatile long motorATicks = 0;
 volatile long motorBTicks = 0;
+
+// Motor Angles (for Joint State Publisher)
+double motorAAngle = 0;
+double motorBAngle = 0;
 
 // Controller Update Interval
 unsigned long updateRate = ((double) (1.0/PID_UPDATE_FREQ) * 1000);
@@ -63,12 +69,16 @@ Motor motorA = Motor(8, 9, 10);
 Motor motorB = Motor(11, 12, 13);
 
 // ROS Messages
-geometry_msgs::Vector3Stamped speedMsg;
 geometry_msgs::Vector3Stamped speedCtrlMsg;
+sensor_msgs::JointState jointStatesMsg;
+float jointStateVelocity[2];
+float jointStatePosition[2];
+float jointStateEffort[2];
+char *jointStateNames[2] = {"left_wheel_joint", "right_wheel_joint"};
 
 // ROS Node (Pub and Sub) Initialization
 ros::NodeHandle nh;
-ros::Publisher speedPub("wheel_velocity", &speedMsg);
+ros::Publisher jointStates("joint_states", &jointStatesMsg);
 
 void speedCtrlCallback(const geometry_msgs::Vector3Stamped& msg) {
     velSetPointA = msg.vector.x;
@@ -81,7 +91,6 @@ void setup() {
     nh.initNode();
     nh.loginfo('Initalize Embedded Motor Controller');
 
-    nh.advertise(speedPub);
     nh.subscribe(speedCtrlSub);
 
     pidMotorA.SetSampleTime(updateRate);
@@ -109,32 +118,27 @@ void setup() {
     attachInterrupt(digitalPinToInterrupt(motorBHallB), doMotorBTick, FALLING);
 
     nh.loginfo('Initialization Complete');
-
 }
 
 void loop() {
     if(millis() - lastUpdate >= updateRate) {
         calculateMotorVelocity();
-        pidMotorA.Compute();
-        pidMotorB.Compute();
-        motorA.setSpeed(pwmMotorA);
-        motorB.setSpeed(pwmMotorB);
 
-        // Print out PID values for motor A
-        //Serial.print(velSetPointA);
-        //Serial.print("\t");
-        //Serial.print(pwmMotorA);
-        //Serial.print("\t");
-        //Serial.print(velMotorAOutput);
+        if(velSetPointA == 0) {
+            motorA.stop();
+        } else {
+            pidMotorA.Compute();
+            motorA.setSpeed(pwmMotorA);
+        }
 
-        //Serial.print("\t");
+        if(velSetPointB == 0) {
+            motorB.stop();
+        } else {
+            pidMotorB.Compute();
+            motorB.setSpeed(pwmMotorB);
+        }
 
-        // Print out PID values for motor B
-        //Serial.print(pwmMotorB);
-        //Serial.print("\t");
-        //Serial.println(velMotorBOutput);
-
-        publishSpeed();
+        publishState();
         lastUpdate = millis();
     }
 
@@ -143,26 +147,37 @@ void loop() {
 
 // Calculate the current velocity of the motors
 void calculateMotorVelocity() {
+    double deltaAngleMotorA = ticksToAngle(motorATicks);
+    double deltaAngleMotorB = ticksToAngle(motorBTicks);
 
     // Calculate current velocity of each motor
-    velMotorAOutput = angularToLinearVelocity(angleToAngularVelocity(ticksToAngle(motorATicks), 50.0/1000.0), wheelDiameter);
-    velMotorBOutput = angularToLinearVelocity(angleToAngularVelocity(ticksToAngle(motorBTicks), 50.0/1000.0), wheelDiameter);
+    velMotorAOutput = angularToLinearVelocity(angleToAngularVelocity(deltaAngleMotorA, 50.0/1000.0), wheelDiameter);
+    velMotorBOutput = angularToLinearVelocity(angleToAngularVelocity(deltaAngleMotorB, 50.0/1000.0), wheelDiameter);
+
+    motorAAngle += deltaAngleMotorA;
+    motorBAngle += deltaAngleMotorB;
 
     // Reset tick count for next iteration
     motorATicks = 0;
     motorBTicks = 0;
 
     lastOdomUpdate = millis();
-
 }
 
-void publishSpeed() {
-    // Construct ROS Message
-    speedMsg.header.stamp = nh.now();
-    speedMsg.vector.x = velMotorAOutput;
-    speedMsg.vector.y = velMotorBOutput;
-    speedMsg.vector.z = 0;
-    speedPub.publish(&speedMsg);
+void publishState() {
+    jointStateVelocity[0] = velMotorAOutput;
+    jointStateVelocity[1] = velMotorBOutput;
+    jointStatePosition[0] = motorAAngle;
+    jointStatePosition[1] = motorBAngle;
+    jointStateEffort[0] = 0;
+    jointStateEffort[1] = 0;
+    jointStatesMsg.header.stamp = nh.now();
+    jointStatesMsg.name = jointStateNames;
+    jointStatesMsg.position = jointStatePosition;
+    jointStatesMsg.velocity = jointStateVelocity;
+    jointStatesMsg.effort = jointStateEffort;
+    nh.loginfo('Publishing Joint States for Hardware Interface');
+    jointStates.publish(&jointStatesMsg);
 }
 
 // Convert ticks to angle (in radians)
@@ -182,10 +197,18 @@ double angularToLinearVelocity(double angularVelocity, double wheelRadius) {
 
 // Interrupt Service Routine for Motor A Encoder
 void doMotorATick() {
-    motorATicks++;
+    if(digitalRead(motorAHallA) == HIGH) {
+        motorATicks++;
+    } else {
+        motorATicks--;
+    }
 }
 
+// Interrupt Service Routine for Motor B Encoder
 void doMotorBTick() {
-    motorBTicks++;
+    if(digitalRead(motorBHallA) == HIGH) {
+        motorBTicks++;
+    } else {
+        motorBTicks--;
+    }
 }
-
