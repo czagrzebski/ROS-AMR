@@ -92,6 +92,7 @@ void setup() {
     nh.loginfo('Initalize Embedded Motor Controller');
 
     nh.subscribe(speedCtrlSub);
+    nh.publish(jointStates);
 
     pidMotorA.SetSampleTime(updateRate);
     pidMotorA.SetOutputLimits(0, 255);
