@@ -24,7 +24,7 @@ namespace rosagv_base {
             void read(const ros::Time& time, const ros::Duration& period);
             void write(const ros::Time& time, const ros::Duration& period);
 
-             bool RobotHWInterface::isReceivingMeasuredJointStates(const ros::Duration &timeout);
+            bool RobotHWInterface::isReceivingMeasuredJointStates(const ros::Duration &timeout);
             void measuredJointStateCallback(const sensor_msgs::JointState::ConstPtr& msg);
 
             // For debugging joint states
