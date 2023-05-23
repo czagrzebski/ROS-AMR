@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/czagrzebski/agv_ws/src/ROS-AGV/packages/ros_agv_base/build/devel/setup.sh

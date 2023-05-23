@@ -1,0 +1,17 @@
+<launch>
+
+     <!-- Load DiffBot model -->
+    <param name="robot_description"
+       command="$(find xacro)/xacro '$(find ros_agv_description)/description/robot.urdf.xacro'"/>
+
+    <node name="ros_agv_base" pkg="ros_agv_base" type="ros_agv_base" output="screen"/>
+
+    <!-- Load controller config to the parameter server -->
+    <rosparam command="load" 
+              file="$(find ros_agv_base)/controllers/ros_agv_control.yaml"/>
+
+   <!-- Load the controllers -->
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+        output="screen" args="mobile_base_controller
+                              joint_state_controller"/>
+ </launch>

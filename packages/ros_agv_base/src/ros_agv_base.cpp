@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
 
     // Setup control loop
     ros::Time prev_time = ros::Time::now();
-    ros::Rate rate(50.0); // 50Hz update rate
+    ros::Rate rate(10.0); // 50Hz update rate
     rate.sleep();
 
     while(ros::ok()) {

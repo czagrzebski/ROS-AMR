@@ -7,7 +7,7 @@ namespace rosagv_base
         init();
 
         // Create a publisher for the wheel commands
-        wheel_cmd_pub_ = nh_.advertise<geometry_msgs::Vector3Stamped>("wheel_cmd", 10);
+        wheel_cmd_pub_ = nh_.advertise<geometry_msgs::Vector3Stamped>("wheel_velocity_cmd", 10);
 
         // Create a subscriber for the joint states
         joint_state_sub_ = nh_.subscribe("joint_states", 10, &RobotHWInterface::measuredJointStateCallback, this);
@@ -79,14 +79,7 @@ namespace rosagv_base
 
     void RobotHWInterface::measuredJointStateCallback(const sensor_msgs::JointState::ConstPtr& msg) {
         ROS_INFO("ROS AGV Hardware Interface: Received Joint States");
-        for (std::size_t i = 0; i < joint_names.size(); i++) {
-            for (unsigned int j = 0; j < msg->name.size(); j++) {
-                if (joint_names_[i] == msg->name[j]) {
-                    reg_joint_positions[i] = msg->position[j];
-                    reg_joint_velocities[i] = msg->velocity[j];
-                    reg_joint_efforts[i] = msg->effort[j];
-                }
-            }
-        }
+        // Update the joint state message using pointer aliasing
+        joint_state_msg_ = *msg;
     }
 }

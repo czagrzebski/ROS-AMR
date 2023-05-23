@@ -1,0 +1,8 @@
+prefix=/home/czagrzebski/agv_ws/src/ROS-AGV/packages/ros_agv_base/build/devel
+
+Name: ros_agv_base
+Description: Description of ros_agv_base
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

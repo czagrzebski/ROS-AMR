@@ -1,0 +1,9 @@
+<library path="ros_agv_base">
+  <class name="ros_agv_base/ROSAGVBaseHW" 
+         type="RobotHWInterface"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Hardware Interface for Differential Drive Arduino controller.
+    </description>
+  </class>
+</library>

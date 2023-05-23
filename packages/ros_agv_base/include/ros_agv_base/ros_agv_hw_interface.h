@@ -16,7 +16,6 @@ namespace rosagv_base {
     class RobotHWInterface : public hardware_interface::RobotHW {
         public:
             RobotHWInterface(ros::NodeHandle &nh, urdf::Model *urdf_model = NULL);
-            ~RobotHWInterface();
 
             // Initialize the hardware interface
             bool init();
@@ -24,17 +23,11 @@ namespace rosagv_base {
             void read(const ros::Time& time, const ros::Duration& period);
             void write(const ros::Time& time, const ros::Duration& period);
 
-            bool RobotHWInterface::isReceivingMeasuredJointStates(const ros::Duration &timeout);
+            bool isReceivingMeasuredJointStates(const ros::Duration &timeout);
             void measuredJointStateCallback(const sensor_msgs::JointState::ConstPtr& msg);
-
-            // For debugging joint states
-            virtual void printState();
 
         protected:
             ros::NodeHandle nh_;
-
-            // Load URDF XML from parameter server
-            virtual void loadURDF(ros::NodeHandle &nh, std::string param_name);
 
             std::array<std::string, 2> joint_names = {"left_wheel_joint", "right_wheel_joint"};
 
@@ -61,7 +54,6 @@ namespace rosagv_base {
             double max_velocity;
             double pwm_limit; 
 
-            ros::Subscriber joint_state_sub_;
             void jointStateCallback(const sensor_msgs::JointStateConstPtr& msg);
     };
 }
