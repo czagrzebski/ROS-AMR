@@ -7,9 +7,11 @@
             },
             "includePath": [
                 "/opt/ros/noetic/include/**",
+                "${workspaceFolder}/**",
                 "/home/czagrzebski/agv_ws/src/ROS-AGV/packages/ros_agv_base/include/**",
                 "/home/czagrzebski/agv_ws/src/ROS-AGV/packages/ros_agv_description/include/**",
-                "/usr/include/**"
+                "/usr/include/**",
+                "/opt/ros/noetic/include"
             ],
             "name": "ROS",
             "intelliSenseMode": "gcc-x64",
@@ -21,3 +23,4 @@
     ],
     "version": 4
 }
+

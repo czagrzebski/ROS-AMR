@@ -4,7 +4,7 @@
     <param name="robot_description"
        command="$(find xacro)/xacro '$(find ros_agv_description)/description/robot.urdf.xacro'"/>
 
-    <node name="ros_agv_base" pkg="ros_agv_base" type="ros_agv_base" output="screen"/>
+    <node name="ros_agv_base" pkg="ros_agv_base" type="ros_agv_base" output="screen" launch-prefix="xterm -e gdb -ex run --args"/>
 
     <!-- Load controller config to the parameter server -->
     <rosparam command="load" 

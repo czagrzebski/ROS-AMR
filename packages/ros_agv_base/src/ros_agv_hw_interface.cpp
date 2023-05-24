@@ -56,7 +56,7 @@ namespace rosagv_base
     }
 
     void RobotHWInterface::read(const ros::Time& time, const ros::Duration& period) {
-        ROS_INFO("ROS AGV Hardware Interface: Reading joint state data from the robot");
+        //ROS_INFO("ROS AGV Hardware Interface: Reading joint state data from the robot");
         // Read the joint states from the robot
         for (std::size_t i = 0; i < joint_names.size(); i++) {
             // Read the joint states from the robot
@@ -67,18 +67,19 @@ namespace rosagv_base
     }
 
     void RobotHWInterface::write(const ros::Time& time, const ros::Duration& period) {
-        ROS_INFO("ROS AGV Hardware Interface: Writing velocity data to the robot");
+        //ROS_INFO("ROS AGV Hardware Interface: Writing velocity data to the robot");
         // Publish the wheel commands
         geometry_msgs::Vector3Stamped wheel_cmd_msg;
         wheel_cmd_msg.header.stamp = ros::Time::now();
         wheel_cmd_msg.vector.x = reg_joint_velocity_commands[0];
         wheel_cmd_msg.vector.y = reg_joint_velocity_commands[1];
+        ROS_INFO_STREAM("Left Motor Velocity Command: " << reg_joint_velocity_commands[0]);
         wheel_cmd_msg.vector.z = 0.0;
         wheel_cmd_pub_.publish(wheel_cmd_msg);
     }
 
     void RobotHWInterface::measuredJointStateCallback(const sensor_msgs::JointState::ConstPtr& msg) {
-        ROS_INFO("ROS AGV Hardware Interface: Received Joint States");
+        //ROS_INFO("ROS AGV Hardware Interface: Received Joint States");
         // Update the joint state message using pointer aliasing
         joint_state_msg_ = *msg;
     }

@@ -55,17 +55,16 @@ double pwmMotorB = 0; // PWM value for motor B
 ros::Time prev_update_time;
 
 // Motor PID Constants
-double kp = 325; // proportional Constant
-double ki = 600; // integral constant
+double kp = 32; // proportional Constant
+double ki = 60; // integral constant
 double kd = 0; // derivative constant
 
 // Setup PID Controller for both variables
 PID pidMotorA = PID(&velMotorAOutput, &pwmMotorA, &velSetPointA, kp, ki, kd, DIRECT);
 PID pidMotorB = PID(&velMotorBOutput, &pwmMotorB, &velSetPointB, kp, ki, kd, DIRECT);
 
-// Setup Motors (Pins are currently undefined)
 Motor motorA = Motor(8, 9, 10);
-Motor motorB = Motor(11, 12, 13);
+Motor motorB = Motor(11, 13, 12);
 
 // ROS Messages
 geometry_msgs::Vector3Stamped speedCtrlMsg;
@@ -108,13 +107,13 @@ void setup() {
     nh.advertise(jointStates);
 
     pidMotorA.SetSampleTime(updateRate * 1000);
-    pidMotorA.SetOutputLimits(0, 255);
+    pidMotorA.SetOutputLimits(-255, 255);
     motorA.setSpeed(0);
     motorA.forward();
     pidMotorA.SetMode(AUTOMATIC);
 
     pidMotorB.SetSampleTime(updateRate * 1000);
-    pidMotorB.SetOutputLimits(0, 255);
+    pidMotorB.SetOutputLimits(-255, 255);
     motorB.setSpeed(0);
     motorB.forward();
     pidMotorB.SetMode(AUTOMATIC);
@@ -131,7 +130,7 @@ void setup() {
     attachInterrupt(digitalPinToInterrupt(motorBHallB), doMotorBTick, RISING);
     attachInterrupt(digitalPinToInterrupt(motorBHallB), doMotorBTick, FALLING);
 
-    nh.loginfo('Initialization Complete');
+    nh.loginfo("Initialization Complete");
 }
 
 void loop() {
@@ -191,8 +190,8 @@ void calculateMotorVelocity() {
     double dts = currentUpdate.toSec() - prev_update_time.toSec();
 
     // Calculate current velocity of each motor
-    velMotorAOutput = angleToAngularVelocity(abs(deltaAngleMotorA), dts);
-    velMotorBOutput = angleToAngularVelocity(abs(deltaAngleMotorB), dts);
+    velMotorAOutput = angleToAngularVelocity(deltaAngleMotorA, dts);
+    velMotorBOutput = angleToAngularVelocity(deltaAngleMotorB. dts);
 
     // Calculate the current angle of each motor
     motorAAngle += deltaAngleMotorA;
@@ -241,7 +240,6 @@ double ticksToAngle(long ticks) {
 double angleToAngularVelocity(double angle, double dt) {
     return angle / dt;
 }
-
 
 // Interrupt Service Routine for Motor A Encoder
 void doMotorATick() {
