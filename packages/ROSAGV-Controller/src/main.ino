@@ -27,8 +27,8 @@
 // PID Update Frequency (in Hz)
 #define PID_UPDATE_FREQ 20.0
 
-// Publish Update Frequency (in ms)
-#define PUBLISH_UPDATE_SPEED 100
+// Publish Update Frequency (in Hz)
+#define PUBLISH_UPDATE_SPEED 20.0
 
 // Stores the number of hall encoder ticks for each motor
 volatile long motorATicks = 0;
@@ -39,24 +39,22 @@ float motorAAngle = 0;
 float motorBAngle = 0;
 
 // Controller Update Interval
-unsigned long updateRate = ((double) (1.0/PID_UPDATE_FREQ) * 1000);
-unsigned long lastUpdate = 0;
-unsigned long lastOdomUpdate = 0;
-unsigned long lastPublish = 0;
-
-// Diameter of the wheel (in mm)
-const double wheelDiameter = 65.0; 
+double updateRate = (1.0/PID_UPDATE_FREQ);
+double lastUpdate = 0;
+double lastPublish = 0;
 
 // PID Control Variables
-double velSetPointA = 0.4; // the setpoint for motor A (in m/s)
-double velMotorAOutput = 0; // process output for motor A (in m/s)
+double velSetPointA = 0; // the setpoint for motor A (in rad/s)
+double velMotorAOutput = 0; // process output for motor A (in rad/s)
 double pwmMotorA = 0; // PWM value for motor A
 
-double velSetPointB = 0.4; // the setpoint for motor B (in m/s)
-double velMotorBOutput = 0; // process output for motor B (in m/s)
+double velSetPointB = 0; // the setpoint for motor B (in rad/s)
+double velMotorBOutput = 0; // process output for motor B (in rad/s)
 double pwmMotorB = 0; // PWM value for motor B
 
-// TODO: Get from ROS Parameter Server
+ros::Time prev_update_time;
+
+// Motor PID Constants
 double kp = 325; // proportional Constant
 double ki = 600; // integral constant
 double kd = 0; // derivative constant
@@ -81,40 +79,41 @@ char *jointStateNames[2] = {"left_wheel_joint", "right_wheel_joint"};
 ros::NodeHandle nh;
 ros::Publisher jointStates("joint_states", &jointStatesMsg);
 
-// Convert angular velocity (in rad/s) to linear velocity (in m/s)
-double angularToLinearVelocity(double angularVelocity, double wheelRadius) { 
-    return angularVelocity * (wheelRadius/1000.0);
-}   
-
+// ROS Topic cmd_vel Callback
 void speedCtrlCallback(const geometry_msgs::Vector3Stamped& msg) {
-    velSetPointA = angularToLinearVelocity(msg.vector.x, wheelDiameter/2.0);
-    velSetPointB = angularToLinearVelocity(msg.vector.y, wheelDiameter/2.0);
-    nh.loginfo(String(velSetPointA, 3).concat("Test"));
+    velSetPointA = msg.vector.x;
+    velSetPointB = msg.vector.y;
 }
 
 ros::Subscriber<geometry_msgs::Vector3Stamped> speedCtrlSub("wheel_velocity_cmd", &speedCtrlCallback);
 
 void setup() {
     nh.initNode();
-    nh.loginfo('Initalize Embedded Motor Controller');
 
+    // Wait for ROS to connect to the Serial Port
+    while (!nh.connected()) {
+        nh.spinOnce();
+    }
+
+    nh.loginfo("Initalize Embedded Motor Controller");
+
+    // Setup Joint State Message
     jointStatesMsg.name_length = 2;
     jointStatesMsg.position_length = 2;
     jointStatesMsg.velocity_length = 2;
     jointStatesMsg.effort_length = 2;
     jointStatesMsg.name = jointStateNames;
    
-
     nh.subscribe(speedCtrlSub);
     nh.advertise(jointStates);
 
-    pidMotorA.SetSampleTime(updateRate);
+    pidMotorA.SetSampleTime(updateRate * 1000);
     pidMotorA.SetOutputLimits(0, 255);
     motorA.setSpeed(0);
     motorA.forward();
     pidMotorA.SetMode(AUTOMATIC);
 
-    pidMotorB.SetSampleTime(updateRate);
+    pidMotorB.SetSampleTime(updateRate * 1000);
     pidMotorB.SetOutputLimits(0, 255);
     motorB.setSpeed(0);
     motorB.forward();
@@ -136,7 +135,7 @@ void setup() {
 }
 
 void loop() {
-    if(millis() - lastUpdate >= updateRate) {
+    if(nh.now().toSec() - lastUpdate >= updateRate) {
         calculateMotorVelocity();
 
         // Set Motor A Speed
@@ -182,13 +181,20 @@ void loop() {
 
 // Calculate the current velocity of the motors
 void calculateMotorVelocity() {
+    ros::Time currentUpdate = nh.now();
+
+    // Calculate the change in angle of each motor
     float deltaAngleMotorA = ticksToAngle(motorATicks);
     float deltaAngleMotorB = ticksToAngle(motorBTicks);
 
-    // Calculate current velocity of each motor
-    velMotorAOutput = angularToLinearVelocity(angleToAngularVelocity(abs(deltaAngleMotorA), 50.0/1000.0), wheelDiameter);
-    velMotorBOutput = angularToLinearVelocity(angleToAngularVelocity(abs(deltaAngleMotorB), 50.0/1000.0), wheelDiameter);
+    // Calculate the time between updates
+    double dts = currentUpdate.toSec() - prev_update_time.toSec();
 
+    // Calculate current velocity of each motor
+    velMotorAOutput = angleToAngularVelocity(abs(deltaAngleMotorA), dts);
+    velMotorBOutput = angleToAngularVelocity(abs(deltaAngleMotorB), dts);
+
+    // Calculate the current angle of each motor
     motorAAngle += deltaAngleMotorA;
     motorBAngle += deltaAngleMotorB;
 
@@ -208,12 +214,12 @@ void calculateMotorVelocity() {
     motorATicks = 0;
     motorBTicks = 0;
 
-    lastOdomUpdate = millis();
+    prev_update_time = currentUpdate;
 }
 
 void publishState() {
-    jointStateVelocity[0] = velMotorAOutput/(wheelDiameter/2.0);
-    jointStateVelocity[1] = velMotorBOutput/(wheelDiameter/2.0);
+    jointStateVelocity[0] = velMotorAOutput;
+    jointStateVelocity[1] = velMotorBOutput;
     jointStatePosition[0] = motorAAngle;
     jointStatePosition[1] = motorBAngle;
     jointStateEffort[0] = 0;
