@@ -81,9 +81,15 @@ char *jointStateNames[2] = {"left_wheel_joint", "right_wheel_joint"};
 ros::NodeHandle nh;
 ros::Publisher jointStates("joint_states", &jointStatesMsg);
 
+// Convert angular velocity (in rad/s) to linear velocity (in m/s)
+double angularToLinearVelocity(double angularVelocity, double wheelRadius) { 
+    return angularVelocity * (wheelRadius/1000.0);
+}   
+
 void speedCtrlCallback(const geometry_msgs::Vector3Stamped& msg) {
-    velSetPointA = msg.vector.x;
-    velSetPointB = msg.vector.y;
+    velSetPointA = angularToLinearVelocity(msg.vector.x, wheelDiameter/2.0);
+    velSetPointB = angularToLinearVelocity(msg.vector.y, wheelDiameter/2.0);
+    nh.loginfo(String(velSetPointA, 3).concat("Test"));
 }
 
 ros::Subscriber<geometry_msgs::Vector3Stamped> speedCtrlSub("wheel_velocity_cmd", &speedCtrlCallback);
@@ -206,8 +212,8 @@ void calculateMotorVelocity() {
 }
 
 void publishState() {
-    jointStateVelocity[0] = velMotorAOutput;
-    jointStateVelocity[1] = velMotorBOutput;
+    jointStateVelocity[0] = velMotorAOutput/(wheelDiameter/2.0);
+    jointStateVelocity[1] = velMotorBOutput/(wheelDiameter/2.0);
     jointStatePosition[0] = motorAAngle;
     jointStatePosition[1] = motorBAngle;
     jointStateEffort[0] = 0;
@@ -230,10 +236,6 @@ double angleToAngularVelocity(double angle, double dt) {
     return angle / dt;
 }
 
-// Convert angular velocity (in rad/s) to linear velocity (in m/s)
-double angularToLinearVelocity(double angularVelocity, double wheelRadius) { 
-    return angularVelocity * (wheelRadius/1000.0);
-}   
 
 // Interrupt Service Routine for Motor A Encoder
 void doMotorATick() {
