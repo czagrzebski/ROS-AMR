@@ -10,7 +10,7 @@ namespace rosagv_base
         wheel_cmd_pub_ = nh_.advertise<geometry_msgs::Vector3Stamped>("wheel_velocity_cmd", 10);
 
         // Create a subscriber for the joint states
-        joint_state_sub_ = nh_.subscribe("joint_states", 10, &RobotHWInterface::measuredJointStateCallback, this);
+        joint_state_sub_ = nh_.subscribe("joint_states_control", 10, &RobotHWInterface::measuredJointStateCallback, this);
 
     }
 
@@ -63,6 +63,7 @@ namespace rosagv_base
             reg_joint_positions[i] = joint_state_msg_.position[i];
             reg_joint_velocities[i] = joint_state_msg_.velocity[i];
             reg_joint_efforts[i] = joint_state_msg_.effort[i];
+
         }
     }
 
@@ -73,14 +74,23 @@ namespace rosagv_base
         wheel_cmd_msg.header.stamp = ros::Time::now();
         wheel_cmd_msg.vector.x = reg_joint_velocity_commands[0];
         wheel_cmd_msg.vector.y = reg_joint_velocity_commands[1];
-        ROS_INFO_STREAM("Left Motor Velocity Command: " << reg_joint_velocity_commands[0]);
         wheel_cmd_msg.vector.z = 0.0;
         wheel_cmd_pub_.publish(wheel_cmd_msg);
+
+        printState();
     }
 
     void RobotHWInterface::measuredJointStateCallback(const sensor_msgs::JointState::ConstPtr& msg) {
         //ROS_INFO("ROS AGV Hardware Interface: Received Joint States");
         // Update the joint state message using pointer aliasing
         joint_state_msg_ = *msg;
+
+    }
+
+    void RobotHWInterface::printState() {
+        // Print the joint states to the console
+        for (std::size_t i = 0; i < joint_names.size(); i++) {
+            ROS_INFO_STREAM("Joint " << joint_names[i] << ": " << reg_joint_positions[i] << " " << reg_joint_velocities[i] << " " << reg_joint_efforts[i]);
+        }
     }
 }

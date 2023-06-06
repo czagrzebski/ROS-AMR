@@ -10,9 +10,7 @@ mobile_base_controller:
     left_wheel: 'left_wheel_joint'
     right_wheel: 'right_wheel_joint'
 
-    # Wheel separation and diameter. These are both optional.
-    # diff_drive_controller will attempt to read either one or both from the
-    # URDF if not specified as a parameter
+    # Wheel separation and radius
     wheel_separation : 0.145
     wheel_radius : 0.0325
 
@@ -24,17 +22,17 @@ mobile_base_controller:
 
     # Top level frame (link) of the robot description
     #base_frame_id: base_link
-
-    # Velocity and acceleration limits for the robot
+ 
+     # Velocity and acceleration limits for the robot
     linear:
       x:
         has_velocity_limits    : true
-        max_velocity           : 0.4   # m/s
+        max_velocity           : 0.3   # m/s
         has_acceleration_limits: true
         max_acceleration       : 0.6   # m/s^2
     angular:
       z:
         has_velocity_limits    : true
-        max_velocity           :108.0   # rad/s
+        max_velocity           : 8.0   # rad/s
         has_acceleration_limits: true
         max_acceleration       : 6.0   # rad/s^2

@@ -26,6 +26,8 @@ namespace rosagv_base {
             bool isReceivingMeasuredJointStates(const ros::Duration &timeout);
             void measuredJointStateCallback(const sensor_msgs::JointState::ConstPtr& msg);
 
+            void printState();
+
         protected:
             ros::NodeHandle nh_;
 
