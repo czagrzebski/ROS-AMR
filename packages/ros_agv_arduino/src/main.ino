@@ -39,7 +39,7 @@ float motorAAngle = 0;
 float motorBAngle = 0;
 
 // Controller Update Interval
-double updateRate = (1.0/PID_UPDATE_FREQ);
+double updateRate = (1.0 / PID_UPDATE_FREQ) * 1000.0;
 double lastUpdate = 0;
 double lastPublish = 0;
 
@@ -52,11 +52,11 @@ double velSetPointB = 0; // the setpoint for motor B (in rad/s)
 double velMotorBOutput = 0; // process output for motor B (in rad/s)
 double pwmMotorB = 0; // PWM value for motor B
 
-ros::Time prev_update_time;
+long prev_update_time = 0;
 
 // Motor PID Constants
-double kp = 32; // proportional Constant
-double ki = 60; // integral constant
+double kp = 20; // proportional Constant
+double ki = 40; // integral constant
 double kd = 0; // derivative constant
 
 // Setup PID Controller for both variables
@@ -64,7 +64,7 @@ PID pidMotorA = PID(&velMotorAOutput, &pwmMotorA, &velSetPointA, kp, ki, kd, DIR
 PID pidMotorB = PID(&velMotorBOutput, &pwmMotorB, &velSetPointB, kp, ki, kd, DIRECT);
 
 Motor motorA = Motor(8, 9, 10);
-Motor motorB = Motor(11, 13, 12);
+Motor motorB = Motor(11, 12, 13);
 
 // ROS Messages
 geometry_msgs::Vector3Stamped speedCtrlMsg;
@@ -76,7 +76,7 @@ char *jointStateNames[2] = {"left_wheel_joint", "right_wheel_joint"};
 
 // ROS Node (Pub and Sub) Initialization
 ros::NodeHandle nh;
-ros::Publisher jointStates("joint_states", &jointStatesMsg);
+ros::Publisher jointStates("joint_states_control", &jointStatesMsg);
 
 // ROS Topic cmd_vel Callback
 void speedCtrlCallback(const geometry_msgs::Vector3Stamped& msg) {
@@ -106,13 +106,13 @@ void setup() {
     nh.subscribe(speedCtrlSub);
     nh.advertise(jointStates);
 
-    pidMotorA.SetSampleTime(updateRate * 1000);
+    pidMotorA.SetSampleTime(updateRate);
     pidMotorA.SetOutputLimits(-255, 255);
     motorA.setSpeed(0);
     motorA.forward();
     pidMotorA.SetMode(AUTOMATIC);
 
-    pidMotorB.SetSampleTime(updateRate * 1000);
+    pidMotorB.SetSampleTime(updateRate);
     pidMotorB.SetOutputLimits(-255, 255);
     motorB.setSpeed(0);
     motorB.forward();
@@ -134,7 +134,7 @@ void setup() {
 }
 
 void loop() {
-    if(nh.now().toSec() - lastUpdate >= updateRate) {
+    if(millis() - lastUpdate >= updateRate) {
         calculateMotorVelocity();
 
         // Set Motor A Speed
@@ -180,18 +180,18 @@ void loop() {
 
 // Calculate the current velocity of the motors
 void calculateMotorVelocity() {
-    ros::Time currentUpdate = nh.now();
-
     // Calculate the change in angle of each motor
-    float deltaAngleMotorA = ticksToAngle(motorATicks);
-    float deltaAngleMotorB = ticksToAngle(motorBTicks);
+    double deltaAngleMotorA = ticksToAngle(motorATicks);
+    double deltaAngleMotorB = ticksToAngle(motorBTicks);
 
     // Calculate the time between updates
-    double dts = currentUpdate.toSec() - prev_update_time.toSec();
+    double dt = (millis() - prev_update_time) / 1000.0;
 
     // Calculate current velocity of each motor
-    velMotorAOutput = angleToAngularVelocity(deltaAngleMotorA, dts);
-    velMotorBOutput = angleToAngularVelocity(deltaAngleMotorB. dts);
+    velMotorAOutput = angleToAngularVelocity(deltaAngleMotorA, dt);
+    velMotorBOutput = angleToAngularVelocity(deltaAngleMotorB, dt);
+
+    prev_update_time = millis();
 
     // Calculate the current angle of each motor
     motorAAngle += deltaAngleMotorA;
@@ -213,7 +213,6 @@ void calculateMotorVelocity() {
     motorATicks = 0;
     motorBTicks = 0;
 
-    prev_update_time = currentUpdate;
 }
 
 void publishState() {
@@ -243,18 +242,18 @@ double angleToAngularVelocity(double angle, double dt) {
 
 // Interrupt Service Routine for Motor A Encoder
 void doMotorATick() {
-    if(digitalRead(motorAHallA) == HIGH) {
-        motorATicks++;
-    } else {
+    if(digitalRead(motorAHallA) == digitalRead(motorAHallB)) {
         motorATicks--;
+    } else {
+        motorATicks++;
     }
 }
 
 // Interrupt Service Routine for Motor B Encoder
 void doMotorBTick() {
-    if(digitalRead(motorBHallA) == HIGH) {
-        motorBTicks++;
-    } else {
+    if(digitalRead(motorBHallA) == digitalRead(motorBHallB)) {
         motorBTicks--;
+    } else {
+        motorBTicks++;
     }
 }
