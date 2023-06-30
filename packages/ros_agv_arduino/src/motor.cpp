@@ -4,14 +4,14 @@ Motor::Motor(uint8_t pinEnable, uint8_t pinIN1, uint8_t pinIN2) {
     _pinEnable = pinEnable;
     _pinIN1 = pinIN1;
     _pinIN2 = pinIN2;
-    _pwmValue = 255; 
+    _pwmValue = 0; 
 
     pinMode(_pinEnable, OUTPUT);
     pinMode(_pinIN1, OUTPUT);
     pinMode(_pinIN2, OUTPUT);
 }
 
-void Motor::setSpeed(unsigned short pwmValue) {
+void Motor::setSpeed(int pwmValue) {
     _pwmValue = abs(pwmValue);
     analogWrite(_pinEnable, _pwmValue);
 }

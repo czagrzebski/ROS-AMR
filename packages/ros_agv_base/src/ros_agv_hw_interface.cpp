@@ -7,7 +7,7 @@ namespace rosagv_base
         init();
 
         // Create a publisher for the wheel commands
-        wheel_cmd_pub_ = nh_.advertise<geometry_msgs::Vector3Stamped>("wheel_velocity_cmd", 10);
+        wheel_cmd_pub_ = nh_.advertise<geometry_msgs::Vector3Stamped>("angular_velocity_cmd", 10);
 
         // Create a subscriber for the joint states
         joint_state_sub_ = nh_.subscribe("joint_states_control", 10, &RobotHWInterface::measuredJointStateCallback, this);

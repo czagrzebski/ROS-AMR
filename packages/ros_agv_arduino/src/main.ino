@@ -14,6 +14,7 @@
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/Imu.h>
 #include "motor.h"
+#include <Encoder.h>
 
 // Encoder Ticks per Revolution
 #define ENC_COUNT_REV 576.0
@@ -31,8 +32,8 @@
 #define PUBLISH_UPDATE_SPEED 20.0
 
 // Stores the number of hall encoder ticks for each motor
-volatile long motorATicks = 0;
-volatile long motorBTicks = 0;
+long previousMotorATicks = 0;
+long previousMotorBTicks = 0;
 
 // Motor Angles (for Joint State Publisher)
 float motorAAngle = 0;
@@ -56,15 +57,18 @@ long prev_update_time = 0;
 
 // Motor PID Constants
 double kp = 20; // proportional Constant
-double ki = 40; // integral constant
+double ki = 30; // integral constant
 double kd = 0; // derivative constant
 
 // Setup PID Controller for both variables
 PID pidMotorA = PID(&velMotorAOutput, &pwmMotorA, &velSetPointA, kp, ki, kd, DIRECT);
 PID pidMotorB = PID(&velMotorBOutput, &pwmMotorB, &velSetPointB, kp, ki, kd, DIRECT);
 
+Encoder motorAEnc(motorAHallA, motorAHallB);
+Encoder motorBEnc(motorBHallA, motorBHallB);
+
 Motor motorA = Motor(8, 9, 10);
-Motor motorB = Motor(11, 12, 13);
+Motor motorB = Motor(13, 12, 11);
 
 // ROS Messages
 geometry_msgs::Vector3Stamped speedCtrlMsg;
@@ -80,11 +84,13 @@ ros::Publisher jointStates("joint_states_control", &jointStatesMsg);
 
 // ROS Topic cmd_vel Callback
 void speedCtrlCallback(const geometry_msgs::Vector3Stamped& msg) {
+    nh.loginfo(String(pwmMotorA).c_str());
+
     velSetPointA = msg.vector.x;
     velSetPointB = msg.vector.y;
 }
 
-ros::Subscriber<geometry_msgs::Vector3Stamped> speedCtrlSub("wheel_velocity_cmd", &speedCtrlCallback);
+ros::Subscriber<geometry_msgs::Vector3Stamped> speedCtrlSub("angular_velocity_cmd", &speedCtrlCallback);
 
 void setup() {
     nh.initNode();
@@ -107,70 +113,61 @@ void setup() {
     nh.advertise(jointStates);
 
     pidMotorA.SetSampleTime(updateRate);
-    pidMotorA.SetOutputLimits(-255, 255);
+    pidMotorA.SetOutputLimits(-175, 175);
     motorA.setSpeed(0);
     motorA.forward();
     pidMotorA.SetMode(AUTOMATIC);
 
     pidMotorB.SetSampleTime(updateRate);
-    pidMotorB.SetOutputLimits(-255, 255);
+    pidMotorB.SetOutputLimits(-175, 175);
     motorB.setSpeed(0);
     motorB.forward();
     pidMotorB.SetMode(AUTOMATIC);
-
-    // Attach Interrupts to ISR for Hall Sensors (Motor A)
-    attachInterrupt(digitalPinToInterrupt(motorAHallA), doMotorATick, RISING);
-    attachInterrupt(digitalPinToInterrupt(motorAHallA), doMotorATick, FALLING);
-    attachInterrupt(digitalPinToInterrupt(motorAHallB), doMotorATick, RISING);
-    attachInterrupt(digitalPinToInterrupt(motorAHallB), doMotorATick, FALLING);
-
-    // Attach Interrupts to ISR for Hall Sensors (Motor B)
-    attachInterrupt(digitalPinToInterrupt(motorBHallA), doMotorBTick, RISING);
-    attachInterrupt(digitalPinToInterrupt(motorBHallA), doMotorBTick, FALLING);
-    attachInterrupt(digitalPinToInterrupt(motorBHallB), doMotorBTick, RISING);
-    attachInterrupt(digitalPinToInterrupt(motorBHallB), doMotorBTick, FALLING);
 
     nh.loginfo("Initialization Complete");
 }
 
 void loop() {
+    pidMotorA.Compute();
+    pidMotorB.Compute();
+
     if(millis() - lastUpdate >= updateRate) {
         calculateMotorVelocity();
+
+
+
+        // Set Motor A Direction 
+        if(velSetPointA > 0) {
+            motorA.forward();
+        } else if(velSetPointA < 0) {
+            motorA.backward();
+        }
 
         // Set Motor A Speed
         if(velSetPointA == 0) {
             motorA.stop();
         } else {
-            pidMotorA.Compute();
             motorA.setSpeed(pwmMotorA);
         }
 
-        // Set Motor A Direction 
-        if(velSetPointA > 0) {
-            motorA.forward();
-        } else {
-            motorA.backward();
+        // Set Motor B Direction 
+        if(velSetPointB > 0) {
+            motorB.forward();
+        } else if(velSetPointB < 0){
+            motorB.backward();
         }
 
         // Set Motor B Speed
         if(velSetPointB == 0) {
             motorB.stop();
         } else {
-            pidMotorB.Compute();
             motorB.setSpeed(pwmMotorB);
-        }
-
-        // Set Motor B Direction 
-        if(velSetPointB > 0) {
-            motorB.forward();
-        } else {
-            motorB.backward();
         }
 
         lastUpdate = millis();
     }
 
-    if(millis() - lastPublish >= PUBLISH_UPDATE_SPEED) {
+    if(millis() - lastPublish >= updateRate) {
         publishState();
         lastPublish = millis();
     }
@@ -180,9 +177,18 @@ void loop() {
 
 // Calculate the current velocity of the motors
 void calculateMotorVelocity() {
+    int motorATicks = motorAEnc.read();
+    int motorBTicks = motorBEnc.read();
+
+    long deltaMotorA = motorATicks - previousMotorATicks;
+    long deltaMotorB = motorBTicks - previousMotorBTicks;
+
     // Calculate the change in angle of each motor
-    double deltaAngleMotorA = ticksToAngle(motorATicks);
-    double deltaAngleMotorB = ticksToAngle(motorBTicks);
+    double deltaAngleMotorA = ticksToAngle(deltaMotorA);
+    double deltaAngleMotorB = ticksToAngle(deltaMotorB);
+
+    previousMotorATicks = motorATicks;
+    previousMotorBTicks = motorBTicks;
 
     // Calculate the time between updates
     double dt = (millis() - prev_update_time) / 1000.0;
@@ -191,28 +197,23 @@ void calculateMotorVelocity() {
     velMotorAOutput = angleToAngularVelocity(deltaAngleMotorA, dt);
     velMotorBOutput = angleToAngularVelocity(deltaAngleMotorB, dt);
 
-    prev_update_time = millis();
-
     // Calculate the current angle of each motor
     motorAAngle += deltaAngleMotorA;
     motorBAngle += deltaAngleMotorB;
 
     // Normalize angle to be between 0 and 2PI
-    motorAAngle = fmod(motorAAngle, 2 * PI);
-    motorBAngle = fmod(motorBAngle, 2 * PI);
+    //motorAAngle = fmod(motorAAngle, 2 * PI);
+    //motorBAngle = fmod(motorBAngle, 2 * PI);
 
-    if(motorAAngle < 0) {
-        motorAAngle += 2 * PI;
-    }
+    //if(motorAAngle < 0) {
+        //motorAAngle += 2 * PI;
+    //}
 
-    if(motorBAngle < 0) {
-        motorBAngle += 2 * PI;
-    }
+    //if(motorBAngle < 0) {
+        //motorBAngle += 2 * PI;
+    //}
 
-    // Reset tick count for next iteration
-    motorATicks = 0;
-    motorBTicks = 0;
-
+    prev_update_time = millis();
 }
 
 void publishState() {
@@ -232,28 +233,10 @@ void publishState() {
 
 // Convert ticks to angle (in radians)
 double ticksToAngle(long ticks) { 
-    return ((double) ticks / ENC_COUNT_REV) * 2.0 * PI;
+    return (double) ticks * (2.0 * PI/ ENC_COUNT_REV);
 }
 
 // Convert angle (in radians) to angular velocity (in rad/s)
 double angleToAngularVelocity(double angle, double dt) {
     return angle / dt;
-}
-
-// Interrupt Service Routine for Motor A Encoder
-void doMotorATick() {
-    if(digitalRead(motorAHallA) == digitalRead(motorAHallB)) {
-        motorATicks--;
-    } else {
-        motorATicks++;
-    }
-}
-
-// Interrupt Service Routine for Motor B Encoder
-void doMotorBTick() {
-    if(digitalRead(motorBHallA) == digitalRead(motorBHallB)) {
-        motorBTicks--;
-    } else {
-        motorBTicks++;
-    }
 }
