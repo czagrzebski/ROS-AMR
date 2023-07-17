@@ -1,0 +1,4 @@
+<launch>
+        <param name="params_file" value="mapper.yaml">
+        <include file="$(find slam_toolbox)/launch/online_async.launch" />
+ </launch>

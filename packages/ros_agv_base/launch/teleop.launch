@@ -1,0 +1,17 @@
+<launch>
+
+<!-- Joy Controller Driver Node -->
+
+<node respawn="true" pkg="joy"
+    type="joy_node" name="ros_agv_joy" >
+<param name="dev" type="string" value="/dev/input/js0"/>
+<param name="autorepeat_rate" value="20.0" />
+<param name="config" type="string" value="xbox"/>
+</node>
+
+<!-- Teleoperation Game Controller Node -->
+<node pkg="teleop_twist_joy" name="teleop_twist_joy" type="teleop_node">
+    <rosparam command="load" file="$(find teleop_twist_joy)/config/xbox.config.yaml" />
+    <remap from="cmd_vel" to="mobile_base_controller/cmd_vel"/>        
+</node>
+</launch>

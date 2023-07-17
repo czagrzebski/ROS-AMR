@@ -77,7 +77,7 @@ namespace rosagv_base
         wheel_cmd_msg.vector.z = 0.0;
         wheel_cmd_pub_.publish(wheel_cmd_msg);
 
-        printState();
+        //printState();
     }
 
     void RobotHWInterface::measuredJointStateCallback(const sensor_msgs::JointState::ConstPtr& msg) {
