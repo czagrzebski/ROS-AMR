@@ -35,7 +35,11 @@ A research project for developing an autonomous differential drive mobile robot 
 ## Latest Progress 7/16/23
 Generated a SLAM map of my basement using the slam_toolbox package. The map was generated using the RPLidar A1M8 sensor. Had some troubles getting SLAM to work properly, but was fixed by flipping the laser frame 180 degrees on the Unified Robot Description Format (URDF) file.
 
+Here is a [Video demo](https://www.youtube.com/watch?v=7yjPUBrIlA8) of using slam_toolbox to generate a map of my basement with Synchronous Online SLAM. 
+
 <img src="./media/basement_0_map.png" width="600">
+
+
 
 ## Future Endevaours 
 - OpenCV Object Recognition with YOLOv7 (You Only Look Once) Model
