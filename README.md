@@ -2,15 +2,6 @@
 
 A research project for developing an autonomous differential drive mobile robot using ROS and the ROS navigation stack. This project is still in the research phase and is not expected to be completed anytime in the near-future. See the research folder for notes about the project as I am researching and learning differential drive robots.  
 
-## Version 1 Goals [Complete]
-- [x] Design a chassis for a simplified version of the robot
-- [x] Integrate L298N Motor Controllers with TT 3-6V DC Motors
-- [x] Develop Firmware for MEGA2560
-- [x] Test/calibrate DC encoders for Phase Two Integration
-- [x] Test/calibrate IMU for Phase Two Integration
-
-<img src="./media/phase_one_cad.png"  width="600" >
-
 ## Version 2 Goals [In Progress]
 - [x] Design a CAD model for a differential drive AGV with a 3D printed chassis
 - [x] Install Ubuntu and ROS Noetic on a SBC (Orange Pi 5)
@@ -27,8 +18,8 @@ A research project for developing an autonomous differential drive mobile robot 
 - [x] Create package for SLAM (Simultaneous Localization and Mapping) with slam_toolbox
 - [x] Generate a map of the environment using SLAM
 - [ ] Integrate Robot Localization Package with IMU and Odometry
-- [ ] Setup Navigation Stack with AMCL (Adaptive Monte Carlo Localization) and move_base
-
+- [x] Setup Navigation Stack with AMCL (Adaptive Monte Carlo Localization) and move_base
+- [ ] Create Flask app to remotely control and monitor the robot
 
 <img src="./media/phase_two_cad.png"  width="600" >
 
