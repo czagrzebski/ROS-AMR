@@ -1,6 +1,6 @@
 # ROS Automated Guided Vehicle Research Project
 
-A undergraduate research project for developing an autonomous differential drive mobile robot using ROS and the ROS navigation stack. This project is currently in the development phase and I recently finished a working prototype. See the research folder for notes about the project as I am researching and learning differential drive robots.  
+An undergraduate research project for developing an autonomous differential drive mobile robot using ROS and the ROS navigation stack. This project is currently in the development phase and I recently finished a working prototype. See the research folder for notes about the project as I am researching and learning differential drive robots.  
 
 ## Version 2 Goals [In Progress]
 - [x] Design a CAD model for a differential drive AGV with a 3D printed chassis
