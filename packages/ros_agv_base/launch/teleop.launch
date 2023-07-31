@@ -12,6 +12,6 @@
 <!-- Teleoperation Game Controller Node -->
 <node pkg="teleop_twist_joy" name="teleop_twist_joy" type="teleop_node">
     <rosparam command="load" file="$(find teleop_twist_joy)/config/xbox.config.yaml" />
-    <remap from="cmd_vel" to="mobile_base_controller/cmd_vel"/>        
+    <remap from="cmd_vel" to="cmd_vel_joy"/>        
 </node>
 </launch>
