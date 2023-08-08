@@ -9,8 +9,7 @@
   <include file="$(find ros_agv_base)/launch/amcl.launch" />
 
    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-    <rosparam file="$(find ros_agv_base)/config/costmap_common_params.yaml" command="load" ns="global_costmap" /> 
-    <rosparam file="$(find ros_agv_base)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find ros_agv_base)/config/costmap_common_params.yaml" command="load" /> 
     <rosparam file="$(find ros_agv_base)/config/local_costmap_params.yaml" command="load" />
     <rosparam file="$(find ros_agv_base)/config/global_costmap_params.yaml" command="load" /> 
     <rosparam file="$(find ros_agv_base)/config/base_local_planner_params.yaml" command="load" />

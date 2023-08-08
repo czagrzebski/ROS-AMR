@@ -56,9 +56,9 @@ double pwmMotorB = 0; // PWM value for motor B
 long prev_update_time = 0;
 
 // Motor PID Constants
-double kf = 17.0;
-double kp = 12.0; // proportional Constant
-double ki = 12.0; // integral constant
+double kf = 16.0;
+double kp = 10.0; // proportional Constant
+double ki = 13.0; // integral constant
 double kd = 0.0; // derivative constant
 
 // Setup PID Controller for both variables

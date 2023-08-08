@@ -3,6 +3,11 @@ topics:
     name: navigation
     topic   : cmd_vel_nav
     timeout : 0.5
-    priority: 1
+    priority: 100
+  - 
+    name: joy
+    topic: cmd_vel_joy
+    timeout: 0.5
+    priority: 10
  
 
