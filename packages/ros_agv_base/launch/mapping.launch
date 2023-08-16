@@ -1,4 +1,4 @@
 <launch>
-        <param name="params_file" value="mapper.yaml">
-        <include file="$(find slam_toolbox)/launch/online_async.launch" />
+        <param name="params_file" value="$(find ros_agv_base)/config/sync_map.yaml">
+        <include file="$(find slam_toolbox)/launch/online_sync.launch" />
  </launch>
