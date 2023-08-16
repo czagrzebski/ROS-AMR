@@ -1,4 +1,5 @@
 <launch>
-        <param name="params_file" value="$(find ros_agv_base)/config/sync_map.yaml">
-        <include file="$(find slam_toolbox)/launch/online_sync.launch" />
- </launch>
+        <node pkg="slam_toolbox" type="sync_slam_toolbox_node" name="slam_toolbox" output="screen">
+             <rosparam command="load" file="$(find ros_agv_base)/config/sync_map.yaml" />
+        </node>
+</launch>
