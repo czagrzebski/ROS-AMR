@@ -1,6 +1,6 @@
 image: primary.pgm
 resolution: 0.030000
-origin: [-3.652678, -5.580830, 0.000000]
+origin: [-2.816339, -7.975693, 0.000000]
 negate: 0
 occupied_thresh: 0.65
 free_thresh: 0.196
