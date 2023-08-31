@@ -44,7 +44,6 @@
 
 <img src="./media/phase_two_cad.png">
 
-<br>
 This project is a versatile robot integrating a MEGA 2560 microcontroller, L298N motor driver, DG01D-E DC motors with encoders, Bosch BNO055 IMU, Raspberry Pi 4, and RPLIDAR A1M8 Lidar sensor. Operating on ROS Noetic, the robot combines these components to achieve advanced capabilities. It employs a differential drive mechanism for precise movement control and integrates encoder feedback for accurate odometry. The Bosch BNO055 IMU enhances orientation data, aiding sensor fusion for improved perception. The RPLIDAR A1M8 creates real-time 2D maps crucial for obstacle avoidance and navigation. Leveraging ROS's power, the robot autonomously plans paths, avoiding obstacles safely. The Raspberry Pi 4 serves as the central processing unit, enabling remote control and monitoring. This project finds application in indoor navigation, education, service robotics, exploration, and inspections. By uniting hardware, sensor fusion, and ROS, the Autonomous Mobile Differential Drive Robot exemplifies an intelligent robotic platform adaptable to diverse scenarios.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
