@@ -92,8 +92,7 @@ Generated a SLAM map of my basement using the graph-based SLAM algorithm from th
 
 Below is a demonstration of using the slam_toolbox package to generate a map of my basement with Synchronous Online SLAM. 
 
-[![ROS Mapping Demo](https://img.youtube.com/vi/7yjPUBrIlA8/maxresdefault.jpg)]
-(https://www.youtube.com/watch?v=7yjPUBrIlA8)
+[![ROS Mapping Demo](https://img.youtube.com/vi/7yjPUBrIlA8/maxresdefault.jpg)](https://www.youtube.com/watch?v=7yjPUBrIlA8)
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
