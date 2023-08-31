@@ -90,9 +90,10 @@ This project is a versatile robot integrating a MEGA 2560 microcontroller, L298N
 ## Latest Progress Report 7/25/23
 Generated a SLAM map of my basement using the graph-based SLAM algorithm from the slam_toolbox package. The map was generated using the RPLidar A1M8 sensor with a resolution of 0.3. Had some troubles getting asynchronous online SLAM to generate the map properly over my local network. As a result, I switched to Synchronous online SLAM and that seemed to resolve the issue. 
 
-Here is a [Video demo](https://www.youtube.com/watch?v=7yjPUBrIlA8) of using slam_toolbox to generate a map of my basement with Synchronous Online SLAM. 
+Below is a demonstration of using the slam_toolbox package to generate a map of my basement with Synchronous Online SLAM. 
 
-<img src="./media/basement_0_map.png" width="600">
+[![ROS Mapping Demo](https://img.youtube.com/vi/7yjPUBrIlA8/maxresdefault.jpg)]
+(https://www.youtube.com/watch?v=7yjPUBrIlA8)
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
