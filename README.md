@@ -18,24 +18,23 @@
 *** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
+
+<!-- PROJECT LOGO -->
+
+<div>
+ <!-- <a href="https://github.com/github_username/repo_name">
+    <img src="images/logo.png" alt="Logo" width="80" height="80">
+  </a> -->
+
+<h2>ROS Differential Drive Autonomous Mobile Robot</h2>
+
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
-
-
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
- <!-- <a href="https://github.com/github_username/repo_name">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a> -->
-
-<h3 align="center">ROS Differential Drive Autonomous Mobile Robot</h3>
-
-  <p align="center">
+  <p>
     An autonomous differential drive mobile robot built with a MEGA 2560, L298N Driver, DG01D-E DC Motor w/ Encoder, Bosch BNO055, Raspberry Pi 4, and RPLIDAR A1M8.
   </p>
 </div>
@@ -58,10 +57,7 @@ This project is a versatile robot integrating a MEGA 2560 microcontroller, L298N
 * [![Python][Python]][Python-url]
 * [![C++][C++]][C++-url]
 * [![Ardunio][Ardunio]][Ardunio-url]
-
-
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 <!-- ROADMAP -->
 ## Roadmap for Version 2.1
